@@ -1,4 +1,4 @@
-import { LogOut, Building2, BarChart3 } from "lucide-react";
+import { LogOut, Building2, BarChart3, LayoutDashboard } from "lucide-react";
 
 export default function TopBar({ storeUser, tab, onTabChange, onLogout }) {
   return (
@@ -15,6 +15,12 @@ export default function TopBar({ storeUser, tab, onTabChange, onLogout }) {
         </div>
 
         <nav className="flex items-center gap-1 bg-neutral-800/60 rounded-lg p-1">
+          <TabButton
+            active={tab === "home"}
+            onClick={() => onTabChange("home")}
+            icon={<LayoutDashboard size={16} />}
+            label="الرئيسية"
+          />
           <TabButton
             active={tab === "branches"}
             onClick={() => onTabChange("branches")}

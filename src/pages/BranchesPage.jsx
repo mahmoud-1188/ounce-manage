@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Plus, Store, X } from "lucide-react";
 import { storeApi, ApiError } from "../core/api.js";
 
-export default function BranchesPage({ storeUser }) {
+export default function BranchesPage({ storeUser, onOpenBranch }) {
   const [branches, setBranches] = useState(null);
   const [error, setError] = useState("");
   const [showCreate, setShowCreate] = useState(false);
@@ -44,9 +44,11 @@ export default function BranchesPage({ storeUser }) {
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {branches?.map((b) => (
-            <div
+            <button
               key={b.id}
-              className="rounded-xl border border-neutral-800 bg-neutral-900 p-4 space-y-1.5"
+              type="button"
+              onClick={() => onOpenBranch?.(b.id, b.name)}
+              className="text-start rounded-xl border border-neutral-800 bg-neutral-900 hover:border-amber-500/50 transition-colors p-4 space-y-1.5"
             >
               <div className="flex items-center gap-2 text-neutral-200">
                 <Store size={18} className="text-amber-500" />
@@ -58,7 +60,7 @@ export default function BranchesPage({ storeUser }) {
                   فرع رئيسي
                 </span>
               )}
-            </div>
+            </button>
           ))}
           {branches?.length === 0 && (
             <div className="text-neutral-500 text-sm col-span-full">
