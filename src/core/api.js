@@ -132,6 +132,19 @@ const storeApi = {
    * تجاوز المتجر سقف اشتراكه — راجع storeCanAddBranch في الباك إند.
    */
   createBranch: (payload) => apiFetch("/store/branches", { method: "POST", body: payload }),
+
+  /** GET /store/users — موظفو المتجر المركزيون (owner فقط). */
+  fetchUsers: () => apiFetch("/store/users"),
+
+  /**
+   * POST /store/users { name, email, password, allowedPages?, canManageBranches? }
+   * موظفٌ مركزي جديد بدور staff — allowedPages مصفوفة معرّفات شاشات أو
+   * null (بلا قيد).
+   */
+  createUser: (payload) => apiFetch("/store/users", { method: "POST", body: payload }),
+
+  /** PATCH /store/users/:id { allowedPages?, canManageBranches?, active? } */
+  updateUser: (id, payload) => apiFetch(`/store/users/${id}`, { method: "PATCH", body: payload }),
 };
 
 export {

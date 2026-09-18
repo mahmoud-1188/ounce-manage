@@ -6,7 +6,9 @@ import BranchesPage from "../pages/BranchesPage.jsx";
 import BranchDetailPage from "../pages/BranchDetailPage.jsx";
 import ReportPage from "../pages/ReportPage.jsx";
 import AnalyticsPage from "../pages/AnalyticsPage.jsx";
+import UsersPage from "../pages/UsersPage.jsx";
 import TopBar from "../ui/TopBar.jsx";
+import { effectivePages } from "../core/pageRegistry.js";
 
 /**
  * تطبيق الإدارة المركزية — نقطة الدخول.
@@ -20,6 +22,8 @@ export default function CentralApp() {
   // "loading" أثناء التحقق من جلسة محفوظة، ثم "login" أو "app".
   const [status, setStatus] = useState("loading");
   const [storeUser, setStoreUser] = useState(null);
+  // ⚠ يُحدَّد فعليًّا بعد معرفة صلاحيات المستخدم (انظر الدالتين أدناه) —
+  // "home" هنا افتراضٌ أوّلي فقط لموظفٍ قد لا يملك صلاحية رؤيتها أصلًا.
   const [tab, setTab] = useState("home");
   // ⚠ طبقة فوق التبويبات لا بديلًا عنها: يدخل "تفاصيل فرع" من أي تبويب
   // (الرئيسية أو الفروع)، ويرجع لنفس التبويب الذي جاء منه — لا لتبويبٍ
@@ -32,6 +36,7 @@ export default function CentralApp() {
       .then(({ storeUser: user }) => {
         if (cancelled) return;
         setStoreUser(user);
+        setTab(firstAllowedTab(user));
         setStatus("app");
       })
       .catch(() => {
@@ -43,8 +48,15 @@ export default function CentralApp() {
     };
   }, []);
 
+  /** أول تبويبٍ يملك المستخدم صلاحية رؤيته فعليًّا — لا "home" افتراضًا دائمًا. */
+  function firstAllowedTab(user) {
+    const allowed = effectivePages(user);
+    return allowed[0] || "home";
+  }
+
   const handleLoggedIn = useCallback((user) => {
     setStoreUser(user);
+    setTab(firstAllowedTab(user));
     setStatus("app");
   }, []);
 
@@ -95,6 +107,8 @@ export default function CentralApp() {
           <BranchesPage storeUser={storeUser} onOpenBranch={openBranchDetail} />
         ) : tab === "analytics" ? (
           <AnalyticsPage />
+        ) : tab === "users" ? (
+          <UsersPage />
         ) : (
           <ReportPage />
         )}

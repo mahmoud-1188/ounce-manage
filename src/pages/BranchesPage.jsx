@@ -21,7 +21,7 @@ export default function BranchesPage({ storeUser, onOpenBranch }) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">فروع المتجر</h2>
-        {storeUser?.role === "owner" && (
+        {(storeUser?.role === "owner" || storeUser?.canManageBranches) && (
           <button
             type="button"
             onClick={() => setShowCreate(true)}
