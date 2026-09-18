@@ -5,6 +5,7 @@ import DashboardPage from "../pages/DashboardPage.jsx";
 import BranchesPage from "../pages/BranchesPage.jsx";
 import BranchDetailPage from "../pages/BranchDetailPage.jsx";
 import ReportPage from "../pages/ReportPage.jsx";
+import AnalyticsPage from "../pages/AnalyticsPage.jsx";
 import TopBar from "../ui/TopBar.jsx";
 
 /**
@@ -92,6 +93,8 @@ export default function CentralApp() {
           <DashboardPage onOpenBranch={openBranchDetail} />
         ) : tab === "branches" ? (
           <BranchesPage storeUser={storeUser} onOpenBranch={openBranchDetail} />
+        ) : tab === "analytics" ? (
+          <AnalyticsPage />
         ) : (
           <ReportPage />
         )}

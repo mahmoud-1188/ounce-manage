@@ -119,6 +119,13 @@ const storeApi = {
   fetchReport: (period) => apiFetch(`/store/report${period ? `?period=${period}` : ""}`),
 
   /**
+   * GET /store/analytics?period=YYYY-MM — ترتيب الفروع بمقاييس متعددة
+   * (نمو، دوران مخزون، مبيعات لكل موظف)، طرق الدفع، توزيع العيار،
+   * وأعلى البائعين. راجع src/domain/analyticsReport.js في الباك إند.
+   */
+  fetchAnalytics: (period) => apiFetch(`/store/analytics${period ? `?period=${period}` : ""}`),
+
+  /**
    * POST /store/branches { name, managerName, managerPin } — إنشاء فرع
    * جديد + أول مستخدم manager له. يرجّع 403 بـreason محدَّد
    * (branch_limit_reached, subscription_expired, store_suspended...) إن

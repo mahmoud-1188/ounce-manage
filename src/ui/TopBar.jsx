@@ -1,4 +1,4 @@
-import { LogOut, Building2, BarChart3, LayoutDashboard } from "lucide-react";
+import { LogOut, Building2, BarChart3, LayoutDashboard, LineChart } from "lucide-react";
 
 export default function TopBar({ storeUser, tab, onTabChange, onLogout }) {
   return (
@@ -32,6 +32,12 @@ export default function TopBar({ storeUser, tab, onTabChange, onLogout }) {
             onClick={() => onTabChange("report")}
             icon={<BarChart3 size={16} />}
             label="التقرير المجمّع"
+          />
+          <TabButton
+            active={tab === "analytics"}
+            onClick={() => onTabChange("analytics")}
+            icon={<LineChart size={16} />}
+            label="التحليلات"
           />
         </nav>
 
