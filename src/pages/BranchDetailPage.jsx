@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ArrowRight, Store } from "lucide-react";
 import { storeApi } from "../core/api.js";
+import BranchStaffSection from "./BranchStaffSection.jsx";
 
 const numberFmt = new Intl.NumberFormat("ar-EG", { maximumFractionDigits: 2 });
 
@@ -25,7 +26,7 @@ function currentPeriod() {
  * يُطلب بعد. ما هنا اليوم: كل رقم فعليًّا موجود في التقرير المجمّع
  * الحالي، معروضًا لفرعٍ واحد بدل كل الفروع معًا.
  */
-export default function BranchDetailPage({ branchId, branchName, onBack }) {
+export default function BranchDetailPage({ branchId, branchName, canManageBranches, onBack }) {
   const [period, setPeriod] = useState(currentPeriod());
   const [branch, setBranch] = useState(null);
   const [notFound, setNotFound] = useState(false);
@@ -101,6 +102,8 @@ export default function BranchDetailPage({ branchId, branchName, onBack }) {
             <Stat label="ذمم مدينة (عملاء)" value={fmt(branch.receivable)} tone="good" />
             <Stat label="ذمم دائنة (موردون)" value={fmt(branch.payable)} tone="bad" />
           </div>
+
+          <BranchStaffSection branchId={branchId} canManage={canManageBranches} />
         </>
       )}
     </div>

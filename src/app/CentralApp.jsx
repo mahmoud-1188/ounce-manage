@@ -99,6 +99,7 @@ export default function CentralApp() {
           <BranchDetailPage
             branchId={openBranch.id}
             branchName={openBranch.name}
+            canManageBranches={storeUser?.role === "owner" || !!storeUser?.canManageBranches}
             onBack={closeBranchDetail}
           />
         ) : tab === "home" ? (

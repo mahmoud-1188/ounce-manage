@@ -145,6 +145,34 @@ const storeApi = {
 
   /** PATCH /store/users/:id { allowedPages?, canManageBranches?, active? } */
   updateUser: (id, payload) => apiFetch(`/store/users/${id}`, { method: "PATCH", body: payload }),
+
+  // ── إدارة موظفي فرعٍ بعينه عن بعد (store.routes.js + domain/branchUsers.js) ──
+  // ⚠ نفس منطق AccessSettingsPage.jsx (رقم سري 4-6 أرقام، منع تكرار
+  // الاسم/الرقم، حارس آخر manager) لكن مُنادًى من المركزية لأي فرعٍ يملكه
+  // المتجر — يتطلب requireCanManageBranches في الباك إند.
+
+  /** GET /store/branches/:branchId/users — موظفو فرعٍ بعينه. */
+  fetchBranchUsers: (branchId) => apiFetch(`/store/branches/${branchId}/users`),
+
+  /** POST /store/branches/:branchId/users { name, pin, role, salary } */
+  createBranchUser: (branchId, payload) =>
+    apiFetch(`/store/branches/${branchId}/users`, { method: "POST", body: payload }),
+
+  /** PATCH /store/branches/:branchId/users/:id/rename { name } */
+  renameBranchUser: (branchId, userId, name) =>
+    apiFetch(`/store/branches/${branchId}/users/${userId}/rename`, { method: "PATCH", body: { name } }),
+
+  /** PATCH /store/branches/:branchId/users/:id/ai { canUseAi } */
+  setBranchUserAi: (branchId, userId, canUseAi) =>
+    apiFetch(`/store/branches/${branchId}/users/${userId}/ai`, { method: "PATCH", body: { canUseAi } }),
+
+  /** PATCH /store/branches/:branchId/users/:id/permissions { allowedPages } */
+  setBranchUserPermissions: (branchId, userId, allowedPages) =>
+    apiFetch(`/store/branches/${branchId}/users/${userId}/permissions`, { method: "PATCH", body: { allowedPages } }),
+
+  /** DELETE /store/branches/:branchId/users/:id — تعطيل منطقي (active=false)، لا حذف. */
+  removeBranchUser: (branchId, userId) =>
+    apiFetch(`/store/branches/${branchId}/users/${userId}`, { method: "DELETE" }),
 };
 
 export {
