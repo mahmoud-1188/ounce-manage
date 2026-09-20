@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ArrowRight, Store } from "lucide-react";
 import { storeApi } from "../core/api.js";
 import BranchStaffSection from "./BranchStaffSection.jsx";
+import BranchLinkCard from "./BranchLinkCard.jsx";
 
 const numberFmt = new Intl.NumberFormat("ar-EG", { maximumFractionDigits: 2 });
 
@@ -90,6 +91,8 @@ export default function BranchDetailPage({ branchId, branchName, canManageBranch
       {branch && (
         <>
           <div className="text-xs text-neutral-500 font-mono">{branch.branchRef}</div>
+
+          {canManageBranches && <BranchLinkCard branchRef={branch.branchRef} />}
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <Stat label="مبيعات (صافي)" value={fmt(branch.sales.net)} sub={`${branch.sales.count} فاتورة`} />
