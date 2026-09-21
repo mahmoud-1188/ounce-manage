@@ -133,6 +133,16 @@ const storeApi = {
    */
   createBranch: (payload) => apiFetch("/store/branches", { method: "POST", body: payload }),
 
+  /**
+   * DELETE /store/branches/:branchId  { confirm: "DELETE" }
+   * تعطيل منطقي (soft-delete) لا حذف فعلي — راجع migration
+   * 025_branches_soft_delete في الباك إند. يرفض 403 cannot_delete_hq_branch
+   * للفرع الرئيسي، و400 confirmation_required إن لم تُطابق confirm الكلمة
+   * "DELETE" تمامًا (فحصٌ يُعاد من الخادم بصرف النظر عمّا أرسلته الواجهة).
+   */
+  deleteBranch: (branchId) =>
+    apiFetch(`/store/branches/${branchId}`, { method: "DELETE", body: { confirm: "DELETE" } }),
+
   /** GET /store/users — موظفو المتجر المركزيون (owner فقط). */
   fetchUsers: () => apiFetch("/store/users"),
 
