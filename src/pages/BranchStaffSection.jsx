@@ -160,10 +160,7 @@ export default function BranchStaffSection({ branchId, canManage }) {
                 <>
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <div className="font-medium truncate">
-                        {u.name}
-                        {u.ref && <span className="text-neutral-500 text-[10px] mr-1">{u.ref}</span>}
-                      </div>
+                      <div className="font-medium truncate">{u.name}</div>
                       <div className="text-xs text-neutral-500 mt-0.5">
                         {BRANCH_ROLE_LABELS[u.role] || u.role}
                         {" · "}
@@ -171,7 +168,21 @@ export default function BranchStaffSection({ branchId, canManage }) {
                         {u.salary > 0 && ` · راتب ${new Intl.NumberFormat("ar-EG").format(u.salary)}`}
                       </div>
                     </div>
-                    {!u.active && <span className="text-xs text-neutral-500 shrink-0">معطَّل</span>}
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      {/* ⚠ تغيير مقصود (طلب المستخدم صراحةً): الرمز كان ملاصقًا
+                          للاسم فلا يظهر بوضوح — الآن في أقصى الجهة الأخرى من
+                          الصف، فوق أيقونة الحذف تحديدًا، ليكون واضحًا للعين
+                          مباشرة. */}
+                      {u.ref && (
+                        <span
+                          dir="ltr"
+                          className="text-[10px] font-mono text-amber-400 bg-amber-500/10 border border-amber-500/25 rounded px-1.5 py-0.5"
+                        >
+                          {u.ref}
+                        </span>
+                      )}
+                      {!u.active && <span className="text-xs text-neutral-500">معطَّل</span>}
+                    </div>
                   </div>
 
                   {u.role !== "manager" && (
