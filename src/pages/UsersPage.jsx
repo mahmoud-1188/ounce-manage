@@ -6,8 +6,10 @@ import { PAGE_REGISTRY } from "../core/pageRegistry.js";
 /**
  * إدارة الموظفين المركزيين — نظير AccessSettingsPage.jsx في
  * ounce-frontend، لكن للمستخدم المركزي (store_users) بصلاحيات مبسّطة:
- * أي شاشات من الأربع الحالية يراها الموظف، وهل يملك صلاحية إنشاء فروع
- * جديدة. owner فقط (مفروضة من الباك إند صراحةً، لا من هذه الشاشة وحدها).
+ * أي شاشات من PAGE_REGISTRY يراها الموظف، وهل يملك صلاحية إنشاء فروع
+ * جديدة (canManageBranches) وهل يملك صلاحية إرسال تكويد لفرع
+ * (canSendCoding) — علمان مستقلان عن مجرّد رؤية الشاشة. owner فقط
+ * (مفروضة من الباك إند صراحةً، لا من هذه الشاشة وحدها).
  */
 export default function UsersPage() {
   const [users, setUsers] = useState(null);
@@ -87,6 +89,7 @@ export default function UsersPage() {
                     ? "كل الشاشات · بلا قيد"
                     : `${u.allowedPages.length} من ${PAGE_REGISTRY.length} شاشة`}
                 {u.canManageBranches && u.role !== "owner" && " · يدير الفروع"}
+                {u.canSendCoding && u.role !== "owner" && " · يرسل تكويدًا"}
                 {!u.active && " · معطَّل"}
               </div>
               {u.role !== "owner" && (
@@ -123,6 +126,7 @@ function PermissionsPanel({ user, onBack, onSaved }) {
   const [allowed, setAllowed] = useState(user.allowedPages == null ? PAGE_REGISTRY.map((p) => p.id) : user.allowedPages);
   const [unrestricted, setUnrestricted] = useState(user.allowedPages == null);
   const [canManageBranches, setCanManageBranches] = useState(!!user.canManageBranches);
+  const [canSendCoding, setCanSendCoding] = useState(!!user.canSendCoding);
   const [active, setActive] = useState(user.active !== false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -138,6 +142,7 @@ function PermissionsPanel({ user, onBack, onSaved }) {
       const updated = await storeApi.updateUser(user.id, {
         allowedPages: unrestricted ? null : allowed,
         canManageBranches,
+        canSendCoding,
         active,
       });
       onSaved(updated);
@@ -189,6 +194,14 @@ function PermissionsPanel({ user, onBack, onSaved }) {
       <label className="flex items-center gap-2 rounded-xl border border-neutral-800 bg-neutral-900 p-3.5 cursor-pointer">
         <input type="checkbox" checked={canManageBranches} onChange={(e) => setCanManageBranches(e.target.checked)} className="accent-amber-500" />
         <span className="text-sm">يملك صلاحية إنشاء فروع جديدة</span>
+      </label>
+
+      {/* ⚠ مستقلة عمدًا عن تفعيل شاشة "hqCoding" في allowedPages أعلى —
+          رؤية شاشة التكويد لا تعني صلاحية إرسال بضاعة فعليًّا لفرع.
+          راجع 026_store_user_coding_permission.sql. */}
+      <label className="flex items-center gap-2 rounded-xl border border-neutral-800 bg-neutral-900 p-3.5 cursor-pointer">
+        <input type="checkbox" checked={canSendCoding} onChange={(e) => setCanSendCoding(e.target.checked)} className="accent-amber-500" />
+        <span className="text-sm">يملك صلاحية إرسال تكويد لفرع</span>
       </label>
 
       <label className="flex items-center gap-2 rounded-xl border border-neutral-800 bg-neutral-900 p-3.5 cursor-pointer">
