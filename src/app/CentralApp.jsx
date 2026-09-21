@@ -7,6 +7,7 @@ import BranchDetailPage from "../pages/BranchDetailPage.jsx";
 import ReportPage from "../pages/ReportPage.jsx";
 import AnalyticsPage from "../pages/AnalyticsPage.jsx";
 import UsersPage from "../pages/UsersPage.jsx";
+import HqDocsPage from "../pages/HqDocsPage.jsx";
 import TopBar from "../ui/TopBar.jsx";
 import { effectivePages } from "../core/pageRegistry.js";
 
@@ -110,6 +111,8 @@ export default function CentralApp() {
           <AnalyticsPage />
         ) : tab === "users" ? (
           <UsersPage />
+        ) : tab === "hqDocs" ? (
+          <HqDocsPage storeUser={storeUser} />
         ) : (
           <ReportPage />
         )}

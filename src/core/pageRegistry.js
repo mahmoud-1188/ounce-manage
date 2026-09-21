@@ -1,12 +1,12 @@
-import { LayoutDashboard, Building2, BarChart3, LineChart, Users, Landmark, Send, Plus, TrendingUp } from "lucide-react";
+import { LayoutDashboard, Building2, BarChart3, LineChart, Users, Send } from "lucide-react";
 
 /**
  * سجلّ شاشات التطبيق المركزي — نظير NAV_REGISTRY في ounce-frontend.
- * بدأ بأربع شاشات، وأُضيفت له أربعة أخرى (hqConsole/hqAnalytics/
- * hqDocs/hqCoding) ضمن خطة توسعة المركزي — إدارة الموظفين نفسها لا
- * تُمنع عن نفسها (راجع USERS_PAGE أسفل). يُستخدم في مكانين: بناء
- * تبويبات TopBar (مفلترة حسب allowedPages للمستخدم الحالي)، وشاشة
- * UsersPage عند تحديد صلاحيات موظفٍ مركزي جديد أو قائم.
+ * بدأ بأربع شاشات، وأُضيفت له "hqDocs" (معاملات الإدارة) ضمن خطة
+ * توسعة المركزي — إدارة الموظفين نفسها لا تُمنع عن نفسها (راجع
+ * USERS_PAGE أسفل). يُستخدم في مكانين: بناء تبويبات TopBar (مفلترة حسب
+ * allowedPages للمستخدم الحالي)، وشاشة UsersPage عند تحديد صلاحيات
+ * موظفٍ مركزي جديد أو قائم.
  *
  * ⚠ "users" (شاشة الموظفين نفسها) عمدًا ليست في هذا السجلّ: هي مقصورة
  * على owner دائمًا (requireStoreOwner في الباك إند)، فلا معنى لإدراجها
@@ -18,25 +18,33 @@ const PAGE_REGISTRY = [
   { id: "branches", label: "الفروع", icon: Building2 },
   { id: "report", label: "التقرير المجمّع", icon: BarChart3 },
   { id: "analytics", label: "التحليلات", icon: LineChart },
-  // ⚠ أربعة معرّفات جديدة فقط (لا ستّة) من خطة توسعة المركزي — لا
-  // تحتاج عمود قاعدة بيانات جديد: allowedPages مصفوفة jsonb مرنة أصلًا
-  // (راجع 026_store_user_coding_permission.sql). hqCoding وحده له
-  // صلاحية مستقلة إضافية (canSendCoding) لأنه فعلٌ تجاري لا مجرّد عرض
-  // شاشة.
+  // ⚠ معرّف واحد جديد فقط (لا أربعة كما بدأنا سابقًا) — لا يحتاج عمود
+  // قاعدة بيانات جديد: allowedPages مصفوفة jsonb مرنة أصلًا (راجع
+  // 026_store_user_coding_permission.sql).
   //
-  // ⚠ استُبعد عمدًا من هذا السجلّ اثنان من نقاط المرجع لأنهما ليسا
-  // "صفحة" في هيكل تنقّلنا الفعلي:
+  // ⚠ استُبعد عمدًا من هذا السجلّ أربعة من نقاط المرجع لأنها ليست
+  // "صفحة" جديدة فعليًّا في هيكل تنقّلنا:
+  //   • hqConsole — في المرجع غلافٌ (wrapper) بتبويبات داخلية (الرئيسية/
+  //     التحليلات/الهيكل التنظيمي/الميزان الموحّد/الفروع) — كل هذه
+  //     موجودة بالفعل كتبويبات منفصلة حقيقية عندنا (home/analytics/
+  //     branches)، فلا معنى لغلافٍ إضافي فوقها.
+  //   • hqAnalytics — نفس شاشة "analytics" الحالية بالضبط (راجع تعليق
+  //     أعلى AnalyticsPage.jsx: نظيرها الحيّ المبني على GET
+  //     /store/analytics أصلًا، لا ميزة إضافية).
   //   • hqBranchDetail — موجودة بالفعل كـBranchDetailPage.jsx، تُفتح
   //     بالنقر على فرعٍ من داخل شاشة "branches" نفسها، لا مسارًا
   //     مستقلًا له صلاحية خاصة به. تفعيل "branches" يكفي لرؤيتها.
   //   • hqOrgChart — إدارة أدوار/صلاحيات store_users أنفسهم، من نفس
   //     فئة شاشة "users" الحالية تمامًا (owner فقط دائمًا، مستبعدة
-  //     عمدًا من هذا السجلّ لنفس السبب الموثَّق أعلى الملف) — لا معنى
-  //     لمنح موظفٍ صلاحية "رؤية" شاشة تُدير صلاحيات الموظفين أنفسهم.
-  { id: "hqConsole", label: "الإدارة المركزية", icon: Landmark },
-  { id: "hqAnalytics", label: "تحليلات متقدّمة", icon: TrendingUp },
+  //     عمدًا من هذا السجلّ لنفس السبب الموثَّق أعلى الملف).
+  //
+  // ⚠ hqCoding (التكويد المركزي الفعلي — تخصيص أكواد/طباعة ملصقات
+  // بواسطة المركزي) مُؤجَّلة عمدًا: ميزة مستقلة تحتاج تكامل الطابعة/
+  // RFID (خطة لاحقة)، فلا تُدرَج هنا بعد كي لا يظهر تبويبٌ يفتح شاشة
+  // غير موجودة. إرسال شحنة تكويد لفرع (بلا واجهة التكويد نفسها) يتم من
+  // داخل "hqDocs" أدناه عبر توثيق معاملة goods_from_hq — راجع
+  // 027_hq_transactions.sql وcanSendCoding في UsersPage.jsx.
   { id: "hqDocs", label: "معاملات الإدارة", icon: Send },
-  { id: "hqCoding", label: "التكويد المركزي", icon: Plus },
 ];
 
 const USERS_PAGE = { id: "users", label: "الموظفون", icon: Users };

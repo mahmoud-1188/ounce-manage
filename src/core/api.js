@@ -183,6 +183,27 @@ const storeApi = {
   /** DELETE /store/branches/:branchId/users/:id — تعطيل منطقي (active=false)، لا حذف. */
   removeBranchUser: (branchId, userId) =>
     apiFetch(`/store/branches/${branchId}/users/${userId}`, { method: "DELETE" }),
+
+  // ── معاملات الإدارة (hqDocs — migration 027 في الباك إند) ──
+  // طلبات/تحويلات حقيقية بدأها فرعٌ وتنتظر قرار المركزي، أو شحنة
+  // تكويد (goods_from_hq) تُنشئها الإدارة نفسها.
+
+  /** GET /store/hq-transactions — كل معاملات فروع هذا المتجر. */
+  fetchHqTransactions: () => apiFetch("/store/hq-transactions"),
+
+  /**
+   * POST /store/hq-transactions { branchId, weight, karat, pieces, note? }
+   * تُنشئ goods_from_hq فقط — تتطلّب canSendCoding (403 cannot_send_coding
+   * لموظفٍ بلا هذه الصلاحية صراحةً).
+   */
+  createHqShipment: (payload) => apiFetch("/store/hq-transactions", { method: "POST", body: payload }),
+
+  /** PATCH /store/hq-transactions/:id/decide { decision: 'approved'|'rejected', note? } */
+  decideHqTransaction: (id, decision, note) =>
+    apiFetch(`/store/hq-transactions/${id}/decide`, { method: "PATCH", body: { decision, note } }),
+
+  /** POST /store/hq-transactions/:id/receive — تستلم الإدارة (goods_to_hq/taskir_to_hq/cash_transfer). */
+  receiveHqTransaction: (id) => apiFetch(`/store/hq-transactions/${id}/receive`, { method: "POST" }),
 };
 
 export {
