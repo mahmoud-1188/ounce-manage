@@ -63,7 +63,7 @@ export default function ReportPage() {
       ) : (
         <>
           {totals && (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               <StatCard label="صافي المبيعات" value={fmt(totals.salesNet)} />
               <StatCard label="تكلفة المشتريات" value={fmt(totals.purchasesCost)} />
               <StatCard label="وزن المخزون (عيار 24)" value={`${fmt(totals.inventoryFineWeight)} جم`} />

@@ -95,7 +95,7 @@ export default function BranchDetailPage({ branchId, branchName, canManageBranch
 
           {canManageBranches && <BranchLinkCard branchRef={branch.branchRef} />}
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <Stat label="مبيعات (صافي)" value={fmt(branch.sales.net)} sub={`${branch.sales.count} فاتورة`} />
             <Stat label="إجمالي المبيعات" value={fmt(branch.sales.total)} />
             <Stat label="مشتريات (تكلفة)" value={fmt(branch.purchases.cost)} sub={`${branch.purchases.count} عملية · ${fmt(branch.purchases.weight)} جم`} />
