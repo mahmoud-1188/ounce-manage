@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Coins, Megaphone, Trash2 } from "lucide-react";
 import { storeApi } from "../core/api.js";
+import TargetsCard from "./TargetsCard.jsx";
 
 const money = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmt = (n) => money.format(Number(n) || 0);
@@ -16,6 +17,7 @@ function applyMarkup(world, mode, value) {
  *   ① زيادة الإدارة على السعر العالمي: سعر العمل في الفروع = العالمي +
  *      الزيادة (ريال/جم24 أو ٪)، وعالمي يدوي اختياري يحلّ محلّ الجلب الآلي.
  *   ② إعلاناتٌ تظهر في رئيسية كل فرع حتى تاريخ انتهائها.
+ *   ③ أهداف مبيعات ٣٠ يومًا لكل فرع ونسبة تحقيقها.
  */
 export default function ControlPage({ canManage }) {
   const [policy, setPolicy] = useState(null);
@@ -155,6 +157,8 @@ export default function ControlPage({ canManage }) {
           </div>
         )}
       </div>
+
+      <TargetsCard canManage={canManage} />
     </div>
   );
 }

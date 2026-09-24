@@ -196,6 +196,44 @@ const storeApi = {
   createNotice: (text, days) => apiFetch("/store/notices", { method: "POST", body: { text, days } }),
   deleteNotice: (id) => apiFetch(`/store/notices/${id}`, { method: "DELETE" }),
 
+  // ── لوحة الإدارة (storeConsole.routes.js) ──
+  /** GET /store/alerts — «يحتاج انتباهك الآن» لكل الفروع (block/warn/info) */
+  fetchAlerts: () => apiFetch("/store/alerts"),
+  /** GET /store/consolidated?to=YYYY-MM-DD — الميزان الموحّد مفصّلًا على الفروع */
+  fetchConsolidated: (to) => apiFetch(`/store/consolidated${to ? `?to=${to}` : ""}`),
+  /** GET /store/expenses-matrix?period=d30|mtd|ytd|all — المصروفات حساب × فرع */
+  fetchExpensesMatrix: (period) => apiFetch(`/store/expenses-matrix?period=${period || "mtd"}`),
+  /** GET /store/bank-fees?period=YYYY-MM — عمولة الشبكة المسجّلة والمسوّاة لكل فرع */
+  fetchBankFeesAll: (period) => apiFetch(`/store/bank-fees?period=${period}`),
+  /** POST /store/bank-fees/distribute — توزيع عمولة كشف البنك على الفروع بنسبة المسجّل */
+  distributeBankFees: (period, actualFee, note) =>
+    apiFetch("/store/bank-fees/distribute", { method: "POST", body: { period, actualFee, note } }),
+  /** GET /store/targets — هدف ٣٠ يومًا ومبيعاتها ونسبة التحقيق لكل فرع */
+  fetchTargets: () => apiFetch("/store/targets"),
+  setBranchTarget: (branchId, target30) =>
+    apiFetch(`/store/branches/${branchId}/target`, { method: "PATCH", body: { target30 } }),
+  /** من يعتمد ماذا: expense/refund/supplier_settle → hq | branch */
+  fetchApprovalRouting: () => apiFetch("/store/approval-routing"),
+  saveApprovalRouting: (routing) => apiFetch("/store/approval-routing", { method: "PUT", body: { routing } }),
+  /** صندوق الاعتمادات — status=all للسجلّ كاملًا */
+  fetchStoreApprovals: (all = false) => apiFetch(`/store/approvals${all ? "?status=all" : ""}`),
+  decideStoreApproval: (id, decision, note) =>
+    apiFetch(`/store/approvals/${id}/decide`, { method: "POST", body: { decision, note } }),
+  /** دفاتر الفرع للقراءة: sales|returns|cash|purchases|expenses|receipts|scrap|users */
+  fetchBranchBooks: (branchId, kind) => apiFetch(`/store/branches/${branchId}/books?kind=${kind}`),
+  /** حسابات الفرع عن بعد */
+  fetchAccounts: () => apiFetch("/store/accounts"),
+  fetchBranchReviewQueue: (branchId) => apiFetch(`/store/branches/${branchId}/review-queue`),
+  postBranchReview: (branchId, payload) =>
+    apiFetch(`/store/branches/${branchId}/reviews`, { method: "POST", body: payload }),
+  fetchBranchJournal: (branchId, limit = 100) => apiFetch(`/store/branches/${branchId}/journal?limit=${limit}`),
+  reverseBranchEntry: (branchId, entryId, reason) =>
+    apiFetch(`/store/branches/${branchId}/journal/${entryId}/reverse`, { method: "POST", body: { reason } }),
+  postBranchAdjustment: (branchId, lines, note) =>
+    apiFetch(`/store/branches/${branchId}/adjustment`, { method: "POST", body: { lines, note } }),
+  settleBranchBankFees: (branchId, period, actualFee, note) =>
+    apiFetch(`/store/branches/${branchId}/bank-fees/settle`, { method: "POST", body: { period, actualFee, note } }),
+
   /** POST /store/branches/:branchId/users { name, pin, role, salary } */
   createBranchUser: (branchId, payload) =>
     apiFetch(`/store/branches/${branchId}/users`, { method: "POST", body: payload }),

@@ -1,4 +1,4 @@
-import { LayoutDashboard, Building2, BarChart3, LineChart, Users, Send, SlidersHorizontal } from "lucide-react";
+import { LayoutDashboard, Building2, BarChart3, LineChart, Users, Send, SlidersHorizontal, Scale, Receipt, ShieldCheck } from "lucide-react";
 
 /**
  * سجلّ شاشات التطبيق المركزي — نظير NAV_REGISTRY في ounce-frontend.
@@ -47,6 +47,11 @@ const PAGE_REGISTRY = [
   { id: "hqDocs", label: "معاملات الإدارة", icon: Send },
   // التحكّم (v197): زيادة الإدارة على السعر العالمي وإعلاناتها لكل الفروع
   { id: "control", label: "التحكّم", icon: SlidersHorizontal },
+  // لوحة الإدارة (المركزي المعدّل): الميزان الموحّد · مصروفات الفروع وعمولة
+  // البنك مركزيًّا · الاعتمادات (من يعتمد ماذا + صندوق الطلبات)
+  { id: "consolidated", label: "الموحّد", icon: Scale },
+  { id: "expenses", label: "المصروفات", icon: Receipt },
+  { id: "approvals", label: "الاعتمادات", icon: ShieldCheck },
 ];
 
 const USERS_PAGE = { id: "users", label: "الموظفون", icon: Users };

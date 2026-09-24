@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { LayoutDashboard, TrendingUp } from "lucide-react";
 import { storeApi } from "../core/api.js";
+import AlertsCard from "./AlertsCard.jsx";
 
 const numberFmt = new Intl.NumberFormat("ar-EG", { maximumFractionDigits: 2 });
 
@@ -21,7 +22,7 @@ function currentPeriod() {
  * ReportPage.jsx بالضبط، معروضة هنا بترتيب وتجميع مختلفين لغرض مختلف:
  * "من الأفضل والأسوأ أداءً هذا الشهر؟" بدل "أعطني كل الأرقام في جدول".
  */
-export default function DashboardPage({ onOpenBranch }) {
+export default function DashboardPage({ onOpenBranch, onOpenApprovals }) {
   const [period] = useState(currentPeriod());
   const [report, setReport] = useState(null);
   const [error, setError] = useState("");
@@ -72,6 +73,8 @@ export default function DashboardPage({ onOpenBranch }) {
               <MiniStat label="خزنة (نقد+شبكة)" value={fmt((totals?.safeCash || 0) + (totals?.safeNetwork || 0))} />
             </div>
           </div>
+
+          <AlertsCard onOpenBranch={onOpenBranch} onOpenApprovals={onOpenApprovals} />
 
           {/* ⚠ الذمم مقابل المبيعات: رقمٌ وحده لا يُقلق، ونسبته تُقلق. */}
           {totals?.receivable > totals?.salesNet && totals?.salesNet > 0 && (

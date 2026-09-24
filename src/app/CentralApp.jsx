@@ -9,6 +9,9 @@ import AnalyticsPage from "../pages/AnalyticsPage.jsx";
 import UsersPage from "../pages/UsersPage.jsx";
 import HqDocsPage from "../pages/HqDocsPage.jsx";
 import ControlPage from "../pages/ControlPage.jsx";
+import ConsolidatedPage from "../pages/ConsolidatedPage.jsx";
+import ExpensesPage from "../pages/ExpensesPage.jsx";
+import ApprovalsPage from "../pages/ApprovalsPage.jsx";
 import TopBar from "../ui/TopBar.jsx";
 import { effectivePages } from "../core/pageRegistry.js";
 
@@ -105,7 +108,8 @@ export default function CentralApp() {
             onBack={closeBranchDetail}
           />
         ) : tab === "home" ? (
-          <DashboardPage onOpenBranch={openBranchDetail} />
+          <DashboardPage onOpenBranch={openBranchDetail}
+            onOpenApprovals={effectivePages(storeUser).includes("approvals") ? () => setTab("approvals") : undefined} />
         ) : tab === "branches" ? (
           <BranchesPage storeUser={storeUser} onOpenBranch={openBranchDetail} />
         ) : tab === "analytics" ? (
@@ -116,6 +120,12 @@ export default function CentralApp() {
           <HqDocsPage storeUser={storeUser} />
         ) : tab === "control" ? (
           <ControlPage canManage={storeUser?.role === "owner" || !!storeUser?.canManageBranches} />
+        ) : tab === "consolidated" ? (
+          <ConsolidatedPage />
+        ) : tab === "expenses" ? (
+          <ExpensesPage canManage={storeUser?.role === "owner" || !!storeUser?.canManageBranches} />
+        ) : tab === "approvals" ? (
+          <ApprovalsPage canManage={storeUser?.role === "owner" || !!storeUser?.canManageBranches} />
         ) : (
           <ReportPage />
         )}
