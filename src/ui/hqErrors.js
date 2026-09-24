@@ -20,6 +20,10 @@ const HQ_ERRORS = {
   invalid_line: "سطرٌ غير صالح — مدين أو دائن لا كلاهما",
   cannot_manage_branches: "لا تملك صلاحية إدارة الفروع",
   branch_not_found: "الفرع غير موجود",
+  invalid_tax_rate: "نسبة الضريبة غير صالحة",
+  invalid_thresholds: "حدود الاعتماد غير صالحة",
+  invalid_margin: "هامشٌ غير صالح",
+  invalid_logo: "الشعار كبير أو ليس صورة",
 };
 
 export function hqError(err, fallback = "تعذّر تنفيذ العملية") {

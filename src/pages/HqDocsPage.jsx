@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { CheckCircle2, ClipboardList, Send, X } from "lucide-react";
+import { Banknote, CheckCircle2, ClipboardList, Send, X } from "lucide-react";
 import { storeApi, ApiError } from "../core/api.js";
 
 const numberFmt = new Intl.NumberFormat("ar-EG", { maximumFractionDigits: 2 });
@@ -27,6 +27,7 @@ export default function HqDocsPage({ storeUser }) {
   const [txns, setTxns] = useState(null);
   const [error, setError] = useState("");
   const [showShip, setShowShip] = useState(false);
+  const [showCash, setShowCash] = useState(false);
   const [busyId, setBusyId] = useState(null);
 
   const load = useCallback(() => {
@@ -73,6 +74,17 @@ export default function HqDocsPage({ storeUser }) {
           <ClipboardList size={20} className="text-amber-500" />
           <h2 className="text-lg font-semibold">معاملات الإدارة</h2>
         </div>
+        <div className="flex gap-2">
+        {canManage && (
+          <button
+            type="button"
+            onClick={() => setShowCash(true)}
+            className="flex items-center gap-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm font-medium px-3 py-1.5 transition-colors"
+          >
+            <Banknote size={16} />
+            تحويل نقد
+          </button>
+        )}
         {canSendCoding && (
           <button
             type="button"
@@ -83,6 +95,7 @@ export default function HqDocsPage({ storeUser }) {
             شحنة تكويد لفرع
           </button>
         )}
+        </div>
       </div>
 
       {error && (
@@ -98,10 +111,10 @@ export default function HqDocsPage({ storeUser }) {
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="font-medium truncate">{t.flowLabel}</div>
-                  <div className="text-xs text-neutral-500 truncate">{t.branchName}</div>
+                  <div className="text-xs text-neutral-500 truncate">{t.fromBranchName ? `من ${t.fromBranchName} ← إلى ${t.branchName}` : t.branchName}</div>
                 </div>
                 <span className={`text-xs font-medium shrink-0 ${STATUS_STYLE[t.status]?.cls || "text-neutral-400"}`}>
-                  {STATUS_STYLE[t.status]?.label || t.status}
+                  {t.dir === "hq" && t.status === "pending" ? "بانتظار استلام الفرع" : STATUS_STYLE[t.status]?.label || t.status}
                 </span>
               </div>
               <div className="text-xs text-neutral-500 mt-1.5">
@@ -149,6 +162,9 @@ export default function HqDocsPage({ storeUser }) {
         </div>
       )}
 
+      {showCash && (
+        <CashTransferModal onClose={() => setShowCash(false)} onCreated={() => { setShowCash(false); load(); }} />
+      )}
       {showShip && (
         <ShipCodingModal onClose={() => setShowShip(false)} onCreated={() => { setShowShip(false); load(); }} />
       )}
@@ -276,4 +292,93 @@ function shipErrorMessage(err) {
     default:
       return "تعذّر إرسال الشحنة";
   }
+}
+
+/**
+ * تحويل نقد من الإدارة إلى خزنة فرع (المرجع: «تحويل نقد» في بطاقة الفرع) —
+ * يخرج من خزنة المصدر (الفرع الرئيسي افتراضًا) فورًا إلى «نقدٌ في الطريق»،
+ * ويدخل خزنة الوجهة حين يؤكّد الفرع الاستلام من شاشة «معاملات الإدارة».
+ */
+function CashTransferModal({ onClose, onCreated }) {
+  const [branches, setBranches] = useState(null);
+  const [fromId, setFromId] = useState("");
+  const [toId, setToId] = useState("");
+  const [amount, setAmount] = useState("");
+  const [note, setNote] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    storeApi.fetchBranches().then((d) => {
+      const rows = Array.isArray(d) ? d : d.branches || [];
+      setBranches(rows);
+      const hq = rows.find((b) => b.is_hq || b.isHq) || rows[0];
+      if (hq) setFromId(hq.id);
+      const other = rows.find((b) => b.id !== hq?.id);
+      if (other) setToId(other.id);
+    }).catch(() => setError("تعذّر تحميل الفروع"));
+  }, []);
+
+  async function submit(e) {
+    e.preventDefault();
+    setError("");
+    setBusy(true);
+    try {
+      await storeApi.sendHqCash({ fromBranchId: fromId, toBranchId: toId, amount: Number(amount), note });
+      onCreated();
+    } catch (err) {
+      const code = err instanceof ApiError ? err.body?.error : null;
+      setError(
+        code === "insufficient_source_cash" ? `خزنة المصدر لا تكفي (المتاح ${fmt(err.body.available)})`
+          : code === "same_branch" ? "المصدر والوجهة فرعٌ واحد"
+          : code === "period_locked" ? (err.body.why || "الفترة مقفلة في فرع المصدر")
+          : code === "invalid_amount" ? "المبلغ غير صالح"
+          : "تعذّر التحويل"
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const sel = "w-full rounded-lg bg-neutral-800 border border-neutral-700 px-3 py-2 text-sm";
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+      <form onSubmit={submit} className="w-full max-w-sm bg-neutral-900 border border-neutral-800 rounded-2xl p-6 space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold">تحويل نقد إلى فرع</h3>
+          <button type="button" onClick={onClose} className="text-neutral-400 hover:text-neutral-100"><X size={18} /></button>
+        </div>
+        {!branches ? <div className="text-sm text-neutral-400">جارِ التحميل…</div> : (
+          <>
+            <label className="block text-xs text-neutral-400 space-y-1">
+              <span>من خزنة</span>
+              <select className={sel} value={fromId} onChange={(e) => setFromId(e.target.value)}>
+                {branches.map((b) => <option key={b.id} value={b.id}>{b.name}{b.is_hq || b.isHq ? " (الرئيسي)" : ""}</option>)}
+              </select>
+            </label>
+            <label className="block text-xs text-neutral-400 space-y-1">
+              <span>إلى فرع</span>
+              <select className={sel} value={toId} onChange={(e) => setToId(e.target.value)}>
+                {branches.filter((b) => b.id !== fromId).map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+              </select>
+            </label>
+            <label className="block text-xs text-neutral-400 space-y-1">
+              <span>المبلغ نقدًا</span>
+              <input className={sel} inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0" />
+            </label>
+            <label className="block text-xs text-neutral-400 space-y-1">
+              <span>الغرض</span>
+              <input className={sel} value={note} onChange={(e) => setNote(e.target.value)} maxLength={200} placeholder="تشغيل · صرف رواتب…" />
+            </label>
+            <p className="text-[11px] text-neutral-500">يخرج من خزنة المصدر الآن إلى «نقدٌ في الطريق»، ويدخل خزنة الفرع نقدًا حين يؤكّد استلامه.</p>
+          </>
+        )}
+        {error && <div className="text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-lg px-3 py-2">{error}</div>}
+        <button type="submit" disabled={busy || !branches || !(Number(amount) > 0) || !toId || toId === fromId}
+          className="w-full rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-neutral-950 font-medium py-2 text-sm">
+          {busy ? "جارِ التحويل…" : "حوّل"}
+        </button>
+      </form>
+    </div>
+  );
 }

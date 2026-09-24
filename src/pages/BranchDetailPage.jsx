@@ -7,6 +7,7 @@ import BranchLockCard from "./BranchLockCard.jsx";
 import BranchOpsCard from "./BranchOpsCard.jsx";
 import BranchBooksCard from "./BranchBooksCard.jsx";
 import BranchAccountsCard from "./BranchAccountsCard.jsx";
+import BranchProvisionCard from "./BranchProvisionCard.jsx";
 
 const numberFmt = new Intl.NumberFormat("ar-EG", { maximumFractionDigits: 2 });
 
@@ -113,6 +114,7 @@ export default function BranchDetailPage({ branchId, branchName, canManageBranch
             <Stat label="ذمم دائنة (موردون)" value={fmt(branch.payable)} tone="bad" />
           </div>
 
+          <BranchProvisionCard branchId={branchId} canManage={canManageBranches} />
           <BranchBooksCard branchId={branchId} />
           <BranchAccountsCard branchId={branchId} canManage={canManageBranches} />
 

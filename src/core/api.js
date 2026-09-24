@@ -238,6 +238,10 @@ const storeApi = {
   fetchHqPolicy: () => apiFetch("/store/hq-policy"),
   saveHqPolicy: (policy) => apiFetch("/store/hq-policy", { method: "PUT", body: { policy } }),
 
+  /** تجهيز الفرع: الهوية والإعدادات وقفلها — GET/PUT /store/branches/:id/provision */
+  fetchBranchProvision: (branchId) => apiFetch(`/store/branches/${branchId}/provision`),
+  saveBranchProvision: (branchId, payload) => apiFetch(`/store/branches/${branchId}/provision`, { method: "PUT", body: payload }),
+
   /** POST /store/branches/:branchId/users { name, pin, role, salary } */
   createBranchUser: (branchId, payload) =>
     apiFetch(`/store/branches/${branchId}/users`, { method: "POST", body: payload }),
@@ -275,6 +279,9 @@ const storeApi = {
   /** PATCH /store/hq-transactions/:id/decide { decision: 'approved'|'rejected', note? } */
   decideHqTransaction: (id, decision, note) =>
     apiFetch(`/store/hq-transactions/${id}/decide`, { method: "PATCH", body: { decision, note } }),
+
+  /** POST /store/hq-transactions/cash { toBranchId, fromBranchId?, amount, note } — نقدٌ من خزنة المصدر إلى خزنة فرع */
+  sendHqCash: (payload) => apiFetch("/store/hq-transactions/cash", { method: "POST", body: payload }),
 
   /** POST /store/hq-transactions/:id/receive — تستلم الإدارة (goods_to_hq/taskir_to_hq/cash_transfer). */
   receiveHqTransaction: (id) => apiFetch(`/store/hq-transactions/${id}/receive`, { method: "POST" }),
