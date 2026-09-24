@@ -234,6 +234,10 @@ const storeApi = {
   settleBranchBankFees: (branchId, period, actualFee, note) =>
     apiFetch(`/store/branches/${branchId}/bank-fees/settle`, { method: "POST", body: { period, actualFee, note } }),
 
+  /** سياسة الإدارة على شاشات الفروع وعملياتها — { policy:{byRole, byBranch}, roles, branches, screens, actions } */
+  fetchHqPolicy: () => apiFetch("/store/hq-policy"),
+  saveHqPolicy: (policy) => apiFetch("/store/hq-policy", { method: "PUT", body: { policy } }),
+
   /** POST /store/branches/:branchId/users { name, pin, role, salary } */
   createBranchUser: (branchId, payload) =>
     apiFetch(`/store/branches/${branchId}/users`, { method: "POST", body: payload }),

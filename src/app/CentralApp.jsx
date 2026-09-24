@@ -12,6 +12,7 @@ import ControlPage from "../pages/ControlPage.jsx";
 import ConsolidatedPage from "../pages/ConsolidatedPage.jsx";
 import ExpensesPage from "../pages/ExpensesPage.jsx";
 import ApprovalsPage from "../pages/ApprovalsPage.jsx";
+import PolicyPage from "../pages/PolicyPage.jsx";
 import TopBar from "../ui/TopBar.jsx";
 import { effectivePages } from "../core/pageRegistry.js";
 
@@ -126,6 +127,8 @@ export default function CentralApp() {
           <ExpensesPage canManage={storeUser?.role === "owner" || !!storeUser?.canManageBranches} />
         ) : tab === "approvals" ? (
           <ApprovalsPage canManage={storeUser?.role === "owner" || !!storeUser?.canManageBranches} />
+        ) : tab === "policy" ? (
+          <PolicyPage canManage={storeUser?.role === "owner" || !!storeUser?.canManageBranches} />
         ) : (
           <ReportPage />
         )}
