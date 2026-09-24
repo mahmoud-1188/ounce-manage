@@ -55,6 +55,12 @@ export default function BranchesPage({ storeUser, onOpenBranch }) {
                 <span className="font-medium">{b.name}</span>
               </div>
               <div className="text-xs text-neutral-500 font-mono">{b.ref}</div>
+              {/* صحّة الفرع في بطاقته: المستخدمون · اليوم · آخر بيع · القفل */}
+              <div className="text-[11px] text-neutral-400">
+                {b.users_count ?? 0} مستخدم · {b.open_day_ref ? "يوم مفتوح" : "يوم مغلق"} · آخر بيع{" "}
+                {b.last_sale_at ? new Date(b.last_sale_at).toLocaleDateString("en-GB") : "—"}
+                {b.locked ? <span className="text-red-400"> · مقفل</span> : null}
+              </div>
               {b.is_hq && (
                 <span className="inline-block text-[11px] bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded px-1.5 py-0.5">
                   فرع رئيسي

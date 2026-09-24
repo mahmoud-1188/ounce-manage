@@ -8,6 +8,7 @@ import ReportPage from "../pages/ReportPage.jsx";
 import AnalyticsPage from "../pages/AnalyticsPage.jsx";
 import UsersPage from "../pages/UsersPage.jsx";
 import HqDocsPage from "../pages/HqDocsPage.jsx";
+import ControlPage from "../pages/ControlPage.jsx";
 import TopBar from "../ui/TopBar.jsx";
 import { effectivePages } from "../core/pageRegistry.js";
 
@@ -113,6 +114,8 @@ export default function CentralApp() {
           <UsersPage />
         ) : tab === "hqDocs" ? (
           <HqDocsPage storeUser={storeUser} />
+        ) : tab === "control" ? (
+          <ControlPage canManage={storeUser?.role === "owner" || !!storeUser?.canManageBranches} />
         ) : (
           <ReportPage />
         )}

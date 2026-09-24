@@ -1,4 +1,4 @@
-import { LayoutDashboard, Building2, BarChart3, LineChart, Users, Send } from "lucide-react";
+import { LayoutDashboard, Building2, BarChart3, LineChart, Users, Send, SlidersHorizontal } from "lucide-react";
 
 /**
  * سجلّ شاشات التطبيق المركزي — نظير NAV_REGISTRY في ounce-frontend.
@@ -45,6 +45,8 @@ const PAGE_REGISTRY = [
   // داخل "hqDocs" أدناه عبر توثيق معاملة goods_from_hq — راجع
   // 027_hq_transactions.sql وcanSendCoding في UsersPage.jsx.
   { id: "hqDocs", label: "معاملات الإدارة", icon: Send },
+  // التحكّم (v197): زيادة الإدارة على السعر العالمي وإعلاناتها لكل الفروع
+  { id: "control", label: "التحكّم", icon: SlidersHorizontal },
 ];
 
 const USERS_PAGE = { id: "users", label: "الموظفون", icon: Users };

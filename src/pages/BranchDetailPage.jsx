@@ -4,6 +4,7 @@ import { storeApi, ApiError } from "../core/api.js";
 import BranchStaffSection from "./BranchStaffSection.jsx";
 import BranchLinkCard from "./BranchLinkCard.jsx";
 import BranchLockCard from "./BranchLockCard.jsx";
+import BranchOpsCard from "./BranchOpsCard.jsx";
 
 const numberFmt = new Intl.NumberFormat("ar-EG", { maximumFractionDigits: 2 });
 
@@ -96,6 +97,7 @@ export default function BranchDetailPage({ branchId, branchName, canManageBranch
 
           {canManageBranches && <BranchLinkCard branchRef={branch.branchRef} />}
           {canManageBranches && <BranchLockCard branchId={branchId} />}
+          {canManageBranches && <BranchOpsCard branchId={branchId} />}
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <Stat label="مبيعات (صافي)" value={fmt(branch.sales.net)} sub={`${branch.sales.count} فاتورة`} />

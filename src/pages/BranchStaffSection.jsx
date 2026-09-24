@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Plus, ShieldCheck, Sparkles, Trash2, Users, X } from "lucide-react";
+import { KeyRound, Plus, RotateCcw, ShieldCheck, Sparkles, Trash2, Users, X } from "lucide-react";
 import { storeApi, ApiError } from "../core/api.js";
 
 // ⚠ نفس مسمّيات roles الفعلية في الباك إند (db/migrations/002_auth_rbac.sql)
@@ -11,8 +11,9 @@ const BRANCH_ROLE_LABELS = {
   manager: "المدير",
   scrap_buyer: "مشتري كسر",
   scrap_officer: "مسؤول الكسر",
+  accountant: "المحاسب",
 };
-const BRANCH_ROLE_ORDER = ["employee", "assistant", "manager", "scrap_buyer", "scrap_officer"];
+const BRANCH_ROLE_ORDER = ["employee", "assistant", "manager", "accountant", "scrap_buyer", "scrap_officer"];
 
 /**
  * إدارة موظفي فرعٍ بعينه عن بعد — نظير AccessSettingsPage.jsx في
@@ -33,11 +34,14 @@ export default function BranchStaffSection({ branchId, canManage }) {
   const [renaming, setRenaming] = useState(null);
   const [newName, setNewName] = useState("");
   const [busyId, setBusyId] = useState(null);
+  const [pinFor, setPinFor] = useState(null);   // إعادة الرقم السري من الإدارة
+  const [pinIn, setPinIn] = useState("");
+  const [notice, setNotice] = useState("");
 
   const load = useCallback(() => {
     setError("");
     storeApi
-      .fetchBranchUsers(branchId)
+      .fetchBranchUsers(branchId, { includeInactive: true })
       .then(setUsers)
       .catch(() => setError("تعذّر تحميل موظفي الفرع"));
   }, [branchId]);
@@ -75,13 +79,45 @@ export default function BranchStaffSection({ branchId, canManage }) {
     setError("");
     try {
       await storeApi.removeBranchUser(branchId, u.id);
-      setUsers((prev) => prev.filter((x) => x.id !== u.id));
+      // التعطيل لا حذف: يبقى في القائمة معطَّلًا فيُعاد تفعيله متى شئت
+      setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, active: false } : x)));
     } catch (err) {
       setError(
         err instanceof ApiError && err.body?.error === "would_remove_last_manager"
           ? "لا يمكن إزالة آخر مدير في الفرع"
           : "تعذّر إزالة الموظف"
       );
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const reactivate = async (u) => {
+    setBusyId(u.id);
+    setError("");
+    try {
+      await storeApi.setBranchUserActive(branchId, u.id, true);
+      load();
+    } catch {
+      setError("تعذّر إعادة التفعيل");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  // ⚠ الرقم يُرسل للخادم ويُجزَّأ هناك فقط — لا يُعرض بعد الحفظ ولا يُسجَّل
+  const savePin = async (u) => {
+    if (!/^\d{4,6}$/.test(pinIn)) { setError("الرقم السري من 4 إلى 6 أرقام"); return; }
+    setBusyId(u.id);
+    setError("");
+    try {
+      await storeApi.resetBranchUserPin(branchId, u.id, pinIn);
+      setPinFor(null);
+      setPinIn("");
+      setNotice(`أُعيد الرقم السري لـ${u.name} — أبلغه به`);
+      setTimeout(() => setNotice(""), 4000);
+    } catch (err) {
+      setError(err instanceof ApiError && err.body?.error === "pin_taken" ? "هذا الرقم مستخدم لموظفٍ آخر في الفرع" : "تعذّر إعادة الرقم السري");
     } finally {
       setBusyId(null);
     }
@@ -122,6 +158,9 @@ export default function BranchStaffSection({ branchId, canManage }) {
 
       {error && (
         <div className="text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-lg px-3 py-2">{error}</div>
+      )}
+      {notice && (
+        <div className="text-sm text-emerald-300 bg-emerald-950/40 border border-emerald-900 rounded-lg px-3 py-2">{notice}</div>
       )}
 
       {users === null && !error ? (
@@ -203,7 +242,41 @@ export default function BranchStaffSection({ branchId, canManage }) {
                     </button>
                   )}
 
-                  <div className="flex items-center gap-2 mt-2.5">
+                  {pinFor === u.id && (
+                    <div className="flex gap-2 mt-2">
+                      <input
+                        autoFocus
+                        type="password"
+                        inputMode="numeric"
+                        maxLength={6}
+                        value={pinIn}
+                        onChange={(e) => setPinIn(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                        placeholder="رقم سري جديد (4–6)"
+                        className="flex-1 rounded-lg bg-neutral-800 border border-neutral-700 px-3 py-1.5 text-sm tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      />
+                      <button type="button" disabled={busyId === u.id} onClick={() => savePin(u)}
+                        className="rounded-lg text-xs font-medium px-3 bg-amber-500 hover:bg-amber-400 disabled:opacity-60 text-neutral-950">حفظ</button>
+                      <button type="button" onClick={() => { setPinFor(null); setPinIn(""); }}
+                        className="rounded-lg text-xs px-2 bg-neutral-800 text-neutral-300 border border-neutral-700"><X size={13} /></button>
+                    </div>
+                  )}
+
+                  {!u.active ? (
+                    <div className="flex items-center gap-2 mt-2.5">
+                      <button type="button" disabled={busyId === u.id} onClick={() => reactivate(u)}
+                        className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full bg-neutral-800 text-emerald-400 border border-emerald-500/30 disabled:opacity-60">
+                        <RotateCcw size={11} /> إعادة التفعيل
+                      </button>
+                    </div>
+                  ) : (
+                  <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => { setPinFor(pinFor === u.id ? null : u.id); setPinIn(""); setError(""); }}
+                      className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full bg-neutral-800 text-neutral-300 border border-neutral-700"
+                    >
+                      <KeyRound size={11} /> رقم سري جديد
+                    </button>
                     <button
                       type="button"
                       disabled={busyId === u.id}
@@ -224,11 +297,12 @@ export default function BranchStaffSection({ branchId, canManage }) {
                       disabled={busyId === u.id}
                       onClick={() => remove(u)}
                       className="mr-auto text-red-400 disabled:opacity-60"
-                      title="إزالة"
+                      title="تعطيل"
                     >
                       <Trash2 size={14} />
                     </button>
                   </div>
+                  )}
                 </>
               )}
             </div>

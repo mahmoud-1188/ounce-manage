@@ -169,7 +169,32 @@ const storeApi = {
   // المتجر — يتطلب requireCanManageBranches في الباك إند.
 
   /** GET /store/branches/:branchId/users — موظفو فرعٍ بعينه. */
-  fetchBranchUsers: (branchId) => apiFetch(`/store/branches/${branchId}/users`),
+  fetchBranchUsers: (branchId, { includeInactive = false } = {}) =>
+    apiFetch(`/store/branches/${branchId}/users${includeInactive ? "?includeInactive=1" : ""}`),
+
+  /** PATCH /store/branches/:branchId/users/:id/pin { pin } — إعادة الرقم السري (لا يتكرّر في الفرع) */
+  resetBranchUserPin: (branchId, userId, pin) =>
+    apiFetch(`/store/branches/${branchId}/users/${userId}/pin`, { method: "PATCH", body: { pin } }),
+
+  /** PATCH /store/branches/:branchId/users/:id/active { active } — تفعيل/تعطيل، لا يُعطَّل آخر مدير */
+  setBranchUserActive: (branchId, userId, active) =>
+    apiFetch(`/store/branches/${branchId}/users/${userId}/active`, { method: "PATCH", body: { active } }),
+
+  /** POST /store/branches/:branchId/close-day { note } — إقفال يوم الفرع من الإدارة */
+  closeBranchDay: (branchId, note) =>
+    apiFetch(`/store/branches/${branchId}/close-day`, { method: "POST", body: { note } }),
+
+  /** GET /store/branches/:branchId/audit — آخر 200 حركة في سجل تدقيق الفرع */
+  fetchBranchAudit: (branchId) => apiFetch(`/store/branches/${branchId}/audit`),
+
+  /** GET/PUT /store/price-policy — زيادة الإدارة على السعر العالمي لكل الفروع */
+  fetchPricePolicy: () => apiFetch("/store/price-policy"),
+  savePricePolicy: (payload) => apiFetch("/store/price-policy", { method: "PUT", body: payload }),
+
+  /** إعلانات الإدارة — تظهر في رئيسية كل فرع حتى تاريخ انتهائها */
+  fetchNotices: () => apiFetch("/store/notices"),
+  createNotice: (text, days) => apiFetch("/store/notices", { method: "POST", body: { text, days } }),
+  deleteNotice: (id) => apiFetch(`/store/notices/${id}`, { method: "DELETE" }),
 
   /** POST /store/branches/:branchId/users { name, pin, role, salary } */
   createBranchUser: (branchId, payload) =>
