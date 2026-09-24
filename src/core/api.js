@@ -143,6 +143,13 @@ const storeApi = {
   deleteBranch: (branchId) =>
     apiFetch(`/store/branches/${branchId}`, { method: "DELETE", body: { confirm: "DELETE" } }),
 
+  /**
+   * PATCH /store/branches/:branchId/lock { locked, reason } — قفل الفرع من
+   * الإدارة: الخادم يرفض كل طلباته (423 branch_locked) حتى يُفكّ.
+   */
+  setBranchLock: (branchId, locked, reason) =>
+    apiFetch(`/store/branches/${branchId}/lock`, { method: "PATCH", body: { locked, reason } }),
+
   /** GET /store/users — موظفو المتجر المركزيون (owner فقط). */
   fetchUsers: () => apiFetch("/store/users"),
 
