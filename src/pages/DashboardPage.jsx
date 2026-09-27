@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { LayoutDashboard, TrendingUp } from "lucide-react";
 import { storeApi } from "../core/api.js";
 import AlertsCard from "./AlertsCard.jsx";
+import PriorityNowHq from "../ui/PriorityNowHq.jsx";
+import { hqNowTasks } from "../core/design.js";
 
 const numberFmt = new Intl.NumberFormat("ar-EG", { maximumFractionDigits: 2 });
 
@@ -22,7 +24,7 @@ function currentPeriod() {
  * ReportPage.jsx بالضبط، معروضة هنا بترتيب وتجميع مختلفين لغرض مختلف:
  * "من الأفضل والأسوأ أداءً هذا الشهر؟" بدل "أعطني كل الأرقام في جدول".
  */
-export default function DashboardPage({ onOpenBranch, onOpenApprovals, onOpenHqDocs }) {
+export default function DashboardPage({ onOpenBranch, onOpenApprovals, onOpenHqDocs, radiant = false, onGoTab }) {
   const [period] = useState(currentPeriod());
   const [report, setReport] = useState(null);
   const [error, setError] = useState("");
@@ -37,6 +39,14 @@ export default function DashboardPage({ onOpenBranch, onOpenApprovals, onOpenHqD
 
   useEffect(load, [load]);
 
+  // المُضيء: «الآن» — ما يوقف ← ما ينتظر قرارك ← ما حان وقته
+  const [nowData, setNowData] = useState({ alerts: [], inbox: 0 });
+  useEffect(() => {
+    if (!radiant) return;
+    storeApi.fetchAlerts().then((d) => setNowData((x) => ({ ...x, alerts: d.alerts || [] }))).catch(() => {});
+    storeApi.fetchStoreApprovals().then((d) => setNowData((x) => ({ ...x, inbox: (d.approvals || []).filter((a) => a.status === "pending" && a.approverKind === "hq").length }))).catch(() => {});
+  }, [radiant]);
+
   const totals = report?.totals;
   const branches = report?.branches || [];
   const ranked = [...branches].sort((a, b) => (b.sales?.net || 0) - (a.sales?.net || 0));
@@ -47,6 +57,12 @@ export default function DashboardPage({ onOpenBranch, onOpenApprovals, onOpenHqD
         <LayoutDashboard size={20} className="text-amber-500" />
         <h2 className="text-lg font-semibold">الرئيسية</h2>
       </div>
+
+      {radiant && report && (
+        <PriorityNowHq
+          tasks={hqNowTasks({ branches: (report.branches || []).length, idle: (report.branches || []).filter((b) => !(b.sales?.count > 0)).length, inbox: nowData.inbox, alerts: nowData.alerts })}
+          onPick={(t) => (t.branchId ? onOpenBranch(t.branchId, t.branchName) : t.id !== "home" && onGoTab?.(t.id))} />
+      )}
 
       {error && (
         <div className="text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-lg px-3 py-2">
