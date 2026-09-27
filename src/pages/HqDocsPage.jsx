@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Banknote, CheckCircle2, ClipboardList, Send, X } from "lucide-react";
 import { storeApi, ApiError } from "../core/api.js";
+import CashTransitCard from "./CashTransitCard.jsx";
 
 const numberFmt = new Intl.NumberFormat("ar-EG", { maximumFractionDigits: 2 });
 function fmt(n) {
@@ -29,12 +30,13 @@ export default function HqDocsPage({ storeUser }) {
   const [showShip, setShowShip] = useState(false);
   const [showCash, setShowCash] = useState(false);
   const [busyId, setBusyId] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   const load = useCallback(() => {
     setError("");
     storeApi
       .fetchHqTransactions()
-      .then(setTxns)
+      .then((t) => { setTxns(t); setReloadKey((k) => k + 1); })
       .catch(() => setError("تعذّر تحميل معاملات الإدارة"));
   }, []);
 
@@ -101,6 +103,8 @@ export default function HqDocsPage({ storeUser }) {
       {error && (
         <div className="text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-lg px-3 py-2">{error}</div>
       )}
+
+      <CashTransitCard reloadKey={reloadKey} />
 
       {txns === null && !error ? (
         <div className="text-neutral-400 text-sm">جارِ التحميل…</div>

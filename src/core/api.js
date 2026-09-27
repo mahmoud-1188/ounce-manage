@@ -199,6 +199,7 @@ const storeApi = {
   // ── لوحة الإدارة (storeConsole.routes.js) ──
   /** GET /store/alerts — «يحتاج انتباهك الآن» لكل الفروع (block/warn/info) */
   fetchAlerts: () => apiFetch("/store/alerts"),
+  fetchCashTransit: () => apiFetch("/store/cash-transit"),
   /** GET /store/consolidated?to=YYYY-MM-DD — الميزان الموحّد مفصّلًا على الفروع */
   fetchConsolidated: (to) => apiFetch(`/store/consolidated${to ? `?to=${to}` : ""}`),
   /** GET /store/expenses-matrix?period=d30|mtd|ytd|all — المصروفات حساب × فرع */

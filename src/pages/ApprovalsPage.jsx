@@ -33,12 +33,15 @@ export default function ApprovalsPage({ canManage }) {
   useEffect(loadItems, [loadItems]);
 
   const flash = (t) => { setMsg(t); setTimeout(() => setMsg(""), 3500); };
-  const dirty = rules && savedRules && rules.some((r, i) => r.approver !== savedRules[i].approver);
+  const dirty = rules && savedRules && rules.some((r, i) => r.approver !== savedRules[i].approver || Number(r.hqAbove || 0) !== Number(savedRules[i].hqAbove || 0));
 
   const saveRouting = async () => {
     setBusy(true); setError("");
     try {
+      const bad = rules.find((r) => r.approver === "hq_above" && !(Number(r.hqAbove) > 0));
+      if (bad) { setError(`اكتب الحدّ الذي تعتمد الإدارة فوقه — ${bad.label}`); return; }
       const routing = Object.fromEntries(rules.map((r) => [r.id, r.approver]));
+      routing.hqAbove = Object.fromEntries(rules.filter((r) => r.approver === "hq_above").map((r) => [r.id, Number(r.hqAbove)]));
       await storeApi.saveApprovalRouting(routing);
       setSavedRules(rules);
       flash("اعتُمدت السياسة — تسري على الطلبات الجديدة في كل الفروع");
@@ -73,15 +76,26 @@ export default function ApprovalsPage({ canManage }) {
         {!rules ? <div className="text-xs text-neutral-500">جارِ التحميل…</div> : (
           <div className="space-y-2">
             {rules.map((r, i) => (
-              <div key={r.id} className="flex items-center gap-2 text-sm">
-                <span className="flex-1">{r.label}{r.threshold > 0 && <span className="text-xs text-neutral-500"> · فوق {fmt(r.threshold)}</span>}</span>
-                <div className="flex gap-1 bg-neutral-800/60 rounded-lg p-1">
-                  {[["branch", "مدير الفرع"], ["hq", "الإدارة"]].map(([v, l]) => (
-                    <button key={v} type="button" disabled={!canManage}
-                      onClick={() => setRules(rules.map((x, j) => (j === i ? { ...x, approver: v } : x)))}
-                      className={`px-2.5 py-1 rounded-md text-xs disabled:opacity-60 ${r.approver === v ? "bg-neutral-100 text-neutral-900" : "text-neutral-300"}`}>{l}</button>
-                  ))}
+              <div key={r.id} className="space-y-1.5">
+                <div className="flex items-center gap-2 text-sm flex-wrap">
+                  <span className="flex-1 min-w-[8rem]">{r.label}{r.threshold > 0 && <span className="text-xs text-neutral-500"> · فوق {fmt(r.threshold)}</span>}</span>
+                  <div className="flex gap-1 bg-neutral-800/60 rounded-lg p-1">
+                    {[["branch", "مدير الفرع"], ["hq_above", "الإدارة فوق مبلغ"], ["hq", "الإدارة"]].map(([v, l]) => (
+                      <button key={v} type="button" disabled={!canManage}
+                        onClick={() => setRules(rules.map((x, j) => (j === i ? { ...x, approver: v } : x)))}
+                        className={`px-2.5 py-1 rounded-md text-xs disabled:opacity-60 ${r.approver === v ? "bg-neutral-100 text-neutral-900" : "text-neutral-300"}`}>{l}</button>
+                    ))}
+                  </div>
                 </div>
+                {r.approver === "hq_above" && (
+                  <label className="flex items-center gap-2 text-xs text-neutral-400 ps-1">
+                    الإدارة تعتمد من
+                    <input type="text" inputMode="decimal" disabled={!canManage} value={r.hqAbove || ""}
+                      onChange={(e) => setRules(rules.map((x, j) => (j === i ? { ...x, hqAbove: e.target.value.replace(/[^\d.]/g, "") } : x)))}
+                      className="w-28 rounded-md bg-neutral-950 border border-neutral-700 px-2 py-1 text-neutral-100" placeholder="50000" />
+                    فأكثر — وما دونه لمدير الفرع
+                  </label>
+                )}
               </div>
             ))}
             {canManage && (

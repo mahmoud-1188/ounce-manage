@@ -14,7 +14,7 @@ const DOT = { block: "bg-red-500", warn: "bg-amber-500", info: "bg-neutral-500" 
  * نقدٌ سالب · يوم عملٍ لم يُقفل · طلباتٌ تنتظر الإدارة أو تأخّرت ·
  * ذمم تفوق المبيعات · بضاعة راكدة · فرعٌ بلا حركة. اضغط تنبيهًا لتدخل الفرع.
  */
-export default function AlertsCard({ onOpenBranch, onOpenApprovals }) {
+export default function AlertsCard({ onOpenBranch, onOpenApprovals, onOpenHqDocs }) {
   const [alerts, setAlerts] = useState(null);
   const [error, setError] = useState(false);
   const [showAll, setShowAll] = useState(false);
@@ -48,7 +48,9 @@ export default function AlertsCard({ onOpenBranch, onOpenApprovals }) {
             <button
               key={`${a.branchId}-${a.kind}-${i}`}
               type="button"
-              onClick={() => (a.page === "approvals" && onOpenApprovals ? onOpenApprovals() : onOpenBranch(a.branchId, a.name))}
+              onClick={() => (a.page === "approvals" && onOpenApprovals ? onOpenApprovals()
+                : a.page === "hqDocs" ? onOpenHqDocs?.()
+                : a.branchId ? onOpenBranch(a.branchId, a.name) : null)}
               className={`w-full text-start flex items-center gap-2 rounded-lg border px-3 py-2 text-xs hover:brightness-125 ${TONE[a.level] || TONE.info}`}
             >
               <span className={`w-2 h-2 rounded-full shrink-0 ${DOT[a.level] || DOT.info}`} />

@@ -22,7 +22,7 @@ function currentPeriod() {
  * ReportPage.jsx بالضبط، معروضة هنا بترتيب وتجميع مختلفين لغرض مختلف:
  * "من الأفضل والأسوأ أداءً هذا الشهر؟" بدل "أعطني كل الأرقام في جدول".
  */
-export default function DashboardPage({ onOpenBranch, onOpenApprovals }) {
+export default function DashboardPage({ onOpenBranch, onOpenApprovals, onOpenHqDocs }) {
   const [period] = useState(currentPeriod());
   const [report, setReport] = useState(null);
   const [error, setError] = useState("");
@@ -74,7 +74,7 @@ export default function DashboardPage({ onOpenBranch, onOpenApprovals }) {
             </div>
           </div>
 
-          <AlertsCard onOpenBranch={onOpenBranch} onOpenApprovals={onOpenApprovals} />
+          <AlertsCard onOpenBranch={onOpenBranch} onOpenApprovals={onOpenApprovals} onOpenHqDocs={onOpenHqDocs} />
 
           {/* ⚠ الذمم مقابل المبيعات: رقمٌ وحده لا يُقلق، ونسبته تُقلق. */}
           {totals?.receivable > totals?.salesNet && totals?.salesNet > 0 && (

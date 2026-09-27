@@ -110,7 +110,8 @@ export default function CentralApp() {
           />
         ) : tab === "home" ? (
           <DashboardPage onOpenBranch={openBranchDetail}
-            onOpenApprovals={effectivePages(storeUser).includes("approvals") ? () => setTab("approvals") : undefined} />
+            onOpenApprovals={effectivePages(storeUser).includes("approvals") ? () => setTab("approvals") : undefined}
+            onOpenHqDocs={effectivePages(storeUser).includes("hqDocs") ? () => setTab("hqDocs") : undefined} />
         ) : tab === "branches" ? (
           <BranchesPage storeUser={storeUser} onOpenBranch={openBranchDetail} />
         ) : tab === "analytics" ? (
