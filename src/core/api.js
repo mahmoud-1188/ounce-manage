@@ -200,6 +200,7 @@ const storeApi = {
   /** GET /store/alerts — «يحتاج انتباهك الآن» لكل الفروع (block/warn/info) */
   fetchAlerts: () => apiFetch("/store/alerts"),
   fetchCashTransit: () => apiFetch("/store/cash-transit"),
+  createHqPurchase: (branchId, body) => apiFetch(`/store/branches/${branchId}/hq-purchase`, { method: "POST", body }),
   /** GET /store/consolidated?to=YYYY-MM-DD — الميزان الموحّد مفصّلًا على الفروع */
   fetchConsolidated: (to) => apiFetch(`/store/consolidated${to ? `?to=${to}` : ""}`),
   /** GET /store/expenses-matrix?period=d30|mtd|ytd|all — المصروفات حساب × فرع */
