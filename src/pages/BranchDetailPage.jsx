@@ -9,6 +9,7 @@ import BranchBooksCard from "./BranchBooksCard.jsx";
 import BranchAccountsCard from "./BranchAccountsCard.jsx";
 import BranchProvisionCard from "./BranchProvisionCard.jsx";
 import HqPurchaseCard from "./HqPurchaseCard.jsx";
+import RemoteStocktakeCard from "./RemoteStocktakeCard.jsx";
 
 const numberFmt = new Intl.NumberFormat("ar-EG", { maximumFractionDigits: 2 });
 
@@ -117,6 +118,7 @@ export default function BranchDetailPage({ branchId, branchName, canManageBranch
 
           <BranchProvisionCard branchId={branchId} canManage={canManageBranches} />
           {canManageBranches && <HqPurchaseCard branchId={branchId} />}
+          {canManageBranches && <RemoteStocktakeCard branchId={branchId} />}
           <BranchBooksCard branchId={branchId} />
           <BranchAccountsCard branchId={branchId} canManage={canManageBranches} />
 

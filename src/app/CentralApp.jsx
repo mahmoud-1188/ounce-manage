@@ -13,6 +13,9 @@ import ConsolidatedPage from "../pages/ConsolidatedPage.jsx";
 import ExpensesPage from "../pages/ExpensesPage.jsx";
 import ApprovalsPage from "../pages/ApprovalsPage.jsx";
 import PolicyPage from "../pages/PolicyPage.jsx";
+import FiscalPage from "../pages/FiscalPage.jsx";
+import OrgPage from "../pages/OrgPage.jsx";
+import OpsLogPage from "../pages/OpsLogPage.jsx";
 import TopBar from "../ui/TopBar.jsx";
 import SimpleHqHome from "../ui/SimpleHqHome.jsx";
 import DesignPicker from "../ui/DesignPicker.jsx";
@@ -135,6 +138,12 @@ export default function CentralApp() {
           <ExpensesPage canManage={storeUser?.role === "owner" || !!storeUser?.canManageBranches} />
         ) : tab === "approvals" ? (
           <ApprovalsPage canManage={storeUser?.role === "owner" || !!storeUser?.canManageBranches} />
+        ) : tab === "fiscal" ? (
+          <FiscalPage canManage={storeUser?.role === "owner" || !!storeUser?.canManageBranches} />
+        ) : tab === "org" ? (
+          <OrgPage isOwner={storeUser?.role === "owner"} />
+        ) : tab === "opsLog" ? (
+          <OpsLogPage />
         ) : tab === "policy" ? (
           <PolicyPage canManage={storeUser?.role === "owner" || !!storeUser?.canManageBranches} />
         ) : (
@@ -167,7 +176,7 @@ export default function CentralApp() {
         </header>
         <main className="max-w-6xl mx-auto p-4">
           {atHome ? (
-            <SimpleHqHome allowed={allowed} onGo={go} onOpenBranch={openBranchDetail} />
+            <SimpleHqHome allowed={allowed} isOwner={storeUser?.role === "owner"} onGo={go} onOpenBranch={openBranchDetail} />
           ) : tab === "dashboard" && !openBranch ? (
             <DashboardPage onOpenBranch={openBranchDetail}
               onOpenApprovals={allowed.includes("approvals") ? () => go("approvals") : undefined}

@@ -1,4 +1,4 @@
-import { LayoutDashboard, Building2, BarChart3, LineChart, Users, Send, SlidersHorizontal, Scale, Receipt, ShieldCheck, LockKeyhole } from "lucide-react";
+import { LayoutDashboard, Building2, BarChart3, LineChart, Users, Send, SlidersHorizontal, Scale, Receipt, ShieldCheck, LockKeyhole, CalendarCheck, Network, History } from "lucide-react";
 
 /**
  * سجلّ شاشات التطبيق المركزي — نظير NAV_REGISTRY في ounce-frontend.
@@ -54,6 +54,10 @@ const PAGE_REGISTRY = [
   { id: "approvals", label: "الاعتمادات", icon: ShieldCheck },
   // الشاشات والعمليات: ما تمنعه الإدارة أو تمنحه لكل دور في الفروع
   { id: "policy", label: "الصلاحيات", icon: LockKeyhole },
+  // المرجع 5.2.0 (migration 061): السنة المالية للفروع · الهيكل الإداري · سجلّ عمليات الإدارة
+  { id: "fiscal", label: "السنة المالية", icon: CalendarCheck },
+  { id: "org", label: "الهيكل", icon: Network },
+  { id: "opsLog", label: "سجلّ الإدارة", icon: History },
 ];
 
 const USERS_PAGE = { id: "users", label: "الموظفون", icon: Users };

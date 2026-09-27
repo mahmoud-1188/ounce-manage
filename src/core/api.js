@@ -287,6 +287,15 @@ const storeApi = {
 
   /** POST /store/hq-transactions/:id/receive — تستلم الإدارة (goods_to_hq/taskir_to_hq/cash_transfer). */
   receiveHqTransaction: (id) => apiFetch(`/store/hq-transactions/${id}/receive`, { method: "POST" }),
+
+  // ── السنة المالية · الجرد من الإدارة · سجلّ الإدارة · الهيكل (migration 061) ──
+  fetchFiscal: () => apiFetch("/store/fiscal"),
+  closeBranchMonth: (branchId, period) => apiFetch(`/store/branches/${branchId}/close-month`, { method: "POST", body: { period } }),
+  fetchStocktakeSheet: (branchId) => apiFetch(`/store/branches/${branchId}/stocktake-sheet`),
+  sendRemoteStocktake: (branchId, counts, note) => apiFetch(`/store/branches/${branchId}/remote-stocktake`, { method: "POST", body: { counts, note } }),
+  fetchRemoteStocktakes: (branchId) => apiFetch(`/store/branches/${branchId}/remote-stocktakes`),
+  fetchOpsLog: () => apiFetch("/store/ops-log"),
+  setUserHqRole: (id, hqRole) => apiFetch(`/store/users/${id}/hq-role`, { method: "PATCH", body: { hqRole } }),
 };
 
 export {

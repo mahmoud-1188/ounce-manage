@@ -24,6 +24,12 @@ const HQ_ERRORS = {
   invalid_thresholds: "حدود الاعتماد غير صالحة",
   invalid_margin: "هامشٌ غير صالح",
   invalid_logo: "الشعار كبير أو ليس صورة",
+  already_closed: "أُقفل هذا الشهر من قبل",
+  period_not_ended: "لا يُقفل شهرٌ لم ينتهِ",
+  no_entries: "لا أصناف في الجرد",
+  invalid_entry: "عددٌ غير صالح",
+  item_not_found: "صنفٌ غير موجود في الفرع",
+  invalid_hq_role: "دورٌ غير معروف",
 };
 
 export function hqError(err, fallback = "تعذّر تنفيذ العملية") {

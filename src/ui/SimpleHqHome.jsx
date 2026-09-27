@@ -19,7 +19,7 @@ const wf = new Intl.NumberFormat("en-US", { maximumFractionDigits: 3, minimumFra
 const LAYOUT = {
   big: [
     { key: "branches", title: "الفروع", hint: "عرض · تجهيز · صلاحيات", icon: Building2, tone: "central",
-      items: [["branches", "إدارة الفروع"], ["dashboard", "لوحة الإدارة"], ["policy", "الصلاحيات"], ["users", "الموظفون"]] },
+      items: [["branches", "إدارة الفروع والجرد عن بُعد"], ["dashboard", "لوحة الإدارة"], ["policy", "الصلاحيات"], ["org", "الهيكل الإداري"], ["users", "الموظفون"]] },
     { key: "approvals", title: "الاعتمادات", hint: "طلبات الفروع", icon: Check, tone: "accounting",
       items: [["approvals", "طلبات الفروع وسياسة الاعتماد"]] },
     { key: "ship", title: "الشحن والتكويد", hint: "بضاعة · نقد · معاملات", icon: Send, tone: "inventory",
@@ -27,13 +27,13 @@ const LAYOUT = {
   ],
   small: [
     { key: "money", title: "المال", icon: Wallet, tone: "money",
-      items: [["expenses", "المصروفات وعمولة البنك"], ["control", "الأسعار والإعلانات"], ["consolidated", "الميزان الموحّد"]] },
+      items: [["expenses", "المصروفات وعمولة البنك"], ["fiscal", "السنة المالية وإقفال الأشهر"], ["control", "الأسعار والإعلانات"], ["consolidated", "الميزان الموحّد"]] },
     { key: "reports", title: "التقارير", icon: BarChart3, tone: "reports",
-      items: [["report", "التقرير المجمّع"], ["analytics", "التحليلات"], ["consolidated", "الموحّد"], ["dashboard", "لوحة الإدارة"]] },
+      items: [["report", "التقرير المجمّع"], ["analytics", "التحليلات"], ["consolidated", "الموحّد"], ["opsLog", "سجلّ عمليات الإدارة"], ["dashboard", "لوحة الإدارة"]] },
   ],
 };
 
-export default function SimpleHqHome({ allowed = [], onGo, onOpenBranch }) {
+export default function SimpleHqHome({ allowed = [], isOwner = false, onGo, onOpenBranch }) {
   const [report, setReport] = useState(null);
   const [alerts, setAlerts] = useState([]);
   const [inbox, setInbox] = useState(0);
@@ -46,7 +46,7 @@ export default function SimpleHqHome({ allowed = [], onGo, onOpenBranch }) {
     storeApi.fetchStoreApprovals().then((d) => setInbox((d.approvals || []).filter((a) => a.status === "pending" && a.approverKind === "hq").length)).catch(() => {});
     storeApi.fetchPricePolicy().then((d) => setSell24(hqSell24(d.policy))).catch(() => {});
   }, []);
-  const has = (id) => id === "dashboard" ? allowed.includes("home") : allowed.includes(id);
+  const has = (id) => (id === "dashboard" ? allowed.includes("home") : id === "users" ? isOwner : allowed.includes(id));
   const withRows = (g) => ({ ...g, rows: g.items.filter(([id]) => has(id)) });
   const big = LAYOUT.big.map(withRows).filter((g) => g.rows.length);
   const small = LAYOUT.small.map(withRows).filter((g) => g.rows.length);
