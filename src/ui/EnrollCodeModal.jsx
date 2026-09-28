@@ -8,21 +8,22 @@ import { qrSvg } from "../core/qrBig.js";
  * الموظّف يفتح رابط الفرع على جواله ← «عندي رمز ربط» ← يمسح الرمز أو يلصقه ← يضع رقمه السري بنفسه.
  * ⚠ صالح 30 دقيقة ولمرّةٍ واحدة، ولا يحمل رقمًا سريًّا — وإصدار رمزٍ جديد يُبطل السابق.
  */
-export default function EnrollCodeModal({ branchId, user, onClose }) {
+export default function EnrollCodeModal({ branchId, user = null, shared = false, onClose }) {
+  const who = shared ? "جهاز الفرع" : user.name;
   const [state, setState] = useState({ loading: true });
   const [left, setLeft] = useState(0);
   const [copied, setCopied] = useState(false);
   const issue = async () => {
     setState({ loading: true });
     try {
-      const r = await storeApi.issueEnrollCode(branchId, user.id);
+      const r = shared ? await storeApi.issueSharedDeviceCode(branchId) : await storeApi.issueEnrollCode(branchId, user.id);
       setState({ code: r.code, expiresAt: r.expiresAt, branchRef: r.branchRef, branchName: r.branchName });
       setLeft(Math.max(0, Math.round((new Date(r.expiresAt).getTime() - Date.now()) / 1000)));
     } catch {
       setState({ error: "تعذّر إصدار رمز الربط" });
     }
   };
-  useEffect(() => { issue(); }, [user.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { issue(); }, [user?.id, shared]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!state.code) return undefined;
     const t = setInterval(() => setLeft((s) => Math.max(0, s - 1)), 1000);
@@ -31,7 +32,9 @@ export default function EnrollCodeModal({ branchId, user, onClose }) {
   const base = (import.meta.env.VITE_BRANCH_APP_URL || "").replace(/\/+$/, "");
   const link = state.branchRef ? `${base}/b/${state.branchRef}` : "";
   const message = state.code
-    ? `ربط جهاز ${user.name} — أونصة (${state.branchName || ""})\n\n١) افتح رابط الفرع على جوالك:\n${link}\n٢) اضغط «عندي رمز ربط» والصق الرمز:\n${state.code}\n٣) ضع رقمك السري بنفسك.\n\nالرمز صالح 30 دقيقة ولمرّةٍ واحدة.`
+    ? shared
+      ? `ربط «جهاز الفرع» — أونصة (${state.branchName || ""})\n\n١) افتح رابط الفرع على التابلت:\n${link}\n٢) اضغط «عندي رمز ربط» والصق الرمز:\n${state.code}\n\nبعدها يدخل منه أي موظفٍ برمزه ورقمه. الرمز صالح 30 دقيقة ولمرّةٍ واحدة.`
+      : `ربط جهاز ${user.name} — أونصة (${state.branchName || ""})\n\n١) افتح رابط الفرع على جوالك:\n${link}\n٢) اضغط «عندي رمز ربط» والصق الرمز:\n${state.code}\n٣) ضع رقمك السري بنفسك — وبعدها تدخل برقمك وحده.\n\nالرمز صالح 30 دقيقة ولمرّةٍ واحدة.`
     : "";
   const copy = async () => { try { await navigator.clipboard.writeText(state.code); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* المتصفح يمنع النسخ */ } };
   return (
@@ -39,7 +42,7 @@ export default function EnrollCodeModal({ branchId, user, onClose }) {
       <div className="w-full max-w-sm rounded-2xl border border-neutral-700 bg-neutral-900 p-5 space-y-3" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-2">
           <QrCode size={18} className="text-amber-500" />
-          <h3 className="font-semibold flex-1">رمز ربط جهاز — {user.name}</h3>
+          <h3 className="font-semibold flex-1">رمز ربط {shared ? "«جهاز الفرع»" : `جهاز — ${who}`}</h3>
           <button type="button" onClick={onClose} className="text-neutral-400 hover:text-neutral-100" aria-label="إغلاق"><X size={18} /></button>
         </div>
         {state.loading && <div className="flex justify-center py-8"><Loader2 className="animate-spin text-amber-500" /></div>}
@@ -62,9 +65,9 @@ export default function EnrollCodeModal({ branchId, user, onClose }) {
               {left <= 0 && <button type="button" onClick={issue} className="font-bold text-amber-400">أصدر رمزًا جديدًا</button>}
             </p>
             <ol className="text-[11px] text-neutral-400 list-decimal pr-4 space-y-0.5 leading-5">
-              <li>يفتح الموظف رابط الفرع على جواله{link ? <span className="block font-mono text-neutral-300" dir="ltr">{link}</span> : null}</li>
-              <li>يضغط «عندي رمز ربط» ويمسح الرمز أو يلصقه.</li>
-              <li>يضع رقمه السري بنفسه — لا تعرفه الإدارة.</li>
+              <li>{shared ? "افتح رابط الفرع على التابلت المشترك" : "يفتح الموظف رابط الفرع على جواله"}{link ? <span className="block font-mono text-neutral-300" dir="ltr">{link}</span> : null}</li>
+              <li>اضغط «عندي رمز ربط» وامسح الرمز أو الصقه.</li>
+              <li>{shared ? "يُربط مباشرةً — ويدخل منه أي موظفٍ برمزه ورقمه." : "يضع رقمه السري بنفسه ويدخل مباشرةً — وبعدها بالرقم وحده."}</li>
             </ol>
             <p className="text-[11px] text-neutral-500">⚠ الرمز لا يحمل رقمًا سريًّا، وإصدار رمزٍ جديد يُبطل السابق.</p>
           </>

@@ -295,6 +295,10 @@ const storeApi = {
   sendRemoteStocktake: (branchId, counts, note) => apiFetch(`/store/branches/${branchId}/remote-stocktake`, { method: "POST", body: { counts, note } }),
   fetchRemoteStocktakes: (branchId) => apiFetch(`/store/branches/${branchId}/remote-stocktakes`),
   fetchOpsLog: () => apiFetch("/store/ops-log"),
+  fetchBranchDevices: (branchId) => apiFetch(`/store/branches/${branchId}/devices`),
+  setDeviceLock: (branchId, mode) => apiFetch(`/store/branches/${branchId}/device-lock`, { method: "PUT", body: { mode } }),
+  revokeBranchDevice: (branchId, deviceId) => apiFetch(`/store/branches/${branchId}/devices/${deviceId}/revoke`, { method: "POST", body: {} }),
+  issueSharedDeviceCode: (branchId) => apiFetch(`/store/branches/${branchId}/shared-device-invite`, { method: "POST", body: {} }),
   issueEnrollCode: (branchId, userId) => apiFetch(`/store/branches/${branchId}/users/${userId}/enroll-invite`, { method: "POST", body: {} }),
   setUserHqRole: (id, hqRole) => apiFetch(`/store/users/${id}/hq-role`, { method: "PATCH", body: { hqRole } }),
 };
