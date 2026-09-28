@@ -295,6 +295,7 @@ const storeApi = {
   sendRemoteStocktake: (branchId, counts, note) => apiFetch(`/store/branches/${branchId}/remote-stocktake`, { method: "POST", body: { counts, note } }),
   fetchRemoteStocktakes: (branchId) => apiFetch(`/store/branches/${branchId}/remote-stocktakes`),
   fetchOpsLog: () => apiFetch("/store/ops-log"),
+  issueEnrollCode: (branchId, userId) => apiFetch(`/store/branches/${branchId}/users/${userId}/enroll-invite`, { method: "POST", body: {} }),
   setUserHqRole: (id, hqRole) => apiFetch(`/store/users/${id}/hq-role`, { method: "PATCH", body: { hqRole } }),
 };
 

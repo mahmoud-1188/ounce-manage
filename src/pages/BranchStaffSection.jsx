@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { KeyRound, Plus, RotateCcw, ShieldCheck, Sparkles, Trash2, Users, X } from "lucide-react";
+import { KeyRound, Plus, QrCode, RotateCcw, ShieldCheck, Sparkles, Trash2, Users, X } from "lucide-react";
+import EnrollCodeModal from "../ui/EnrollCodeModal.jsx";
 import { storeApi, ApiError } from "../core/api.js";
 
 // ⚠ نفس مسمّيات roles الفعلية في الباك إند (db/migrations/002_auth_rbac.sql)
@@ -35,6 +36,7 @@ export default function BranchStaffSection({ branchId, canManage }) {
   const [newName, setNewName] = useState("");
   const [busyId, setBusyId] = useState(null);
   const [pinFor, setPinFor] = useState(null);   // إعادة الرقم السري من الإدارة
+  const [enrollFor, setEnrollFor] = useState(null); // رمز ربط جهاز الموظف
   const [pinIn, setPinIn] = useState("");
   const [notice, setNotice] = useState("");
 
@@ -141,6 +143,7 @@ export default function BranchStaffSection({ branchId, canManage }) {
 
   return (
     <div className="space-y-3 pt-2">
+      {enrollFor && <EnrollCodeModal branchId={branchId} user={enrollFor} onClose={() => setEnrollFor(null)} />}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users size={17} className="text-amber-500" />
@@ -276,6 +279,13 @@ export default function BranchStaffSection({ branchId, canManage }) {
                       className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full bg-neutral-800 text-neutral-300 border border-neutral-700"
                     >
                       <KeyRound size={11} /> رقم سري جديد
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEnrollFor(u)}
+                      className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full bg-neutral-800 text-amber-300 border border-amber-500/30"
+                    >
+                      <QrCode size={11} /> رمز ربط جهاز
                     </button>
                     <button
                       type="button"
