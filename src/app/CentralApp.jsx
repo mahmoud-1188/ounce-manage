@@ -162,9 +162,9 @@ export default function CentralApp() {
           <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
             <button type="button" onClick={() => setMenuOpen(true)} aria-label="القائمة" className="w-9 h-9 rounded-xl flex items-center justify-center"
               style={{ background: "#2E2A20", border: "1px solid #4D4230", color: "#E4C47D" }}><Menu size={18} /></button>
-            <img src="/brand/logo-mark-transparent.png" alt="أوقية" className="h-8 w-8 shrink-0" />
+            <img src="/brand/logo-mark-transparent.png" alt="أونصة" className="h-8 w-8 shrink-0" />
             <div className="min-w-0 flex-1">
-              <div className="font-semibold text-sm truncate">أوقية — الإدارة المركزية</div>
+              <div className="font-semibold text-sm truncate">أونصة — الإدارة المركزية</div>
               {storeUser?.name && <div className="text-xs truncate" style={{ color: "#8F887A" }}>{storeUser.name}</div>}
             </div>
             {!atHome && (

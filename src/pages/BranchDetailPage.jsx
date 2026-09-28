@@ -201,7 +201,7 @@ function DeleteBranchModal({ branchName, onClose, onDeleted, deleteFn }) {
 
         <div className="text-sm text-neutral-300 bg-red-950/30 border border-red-900/50 rounded-lg px-3 py-2 space-y-1.5">
           <p>هذا الفرع سيختفي فورًا من كل القوائم والتقارير، ولن يستطيع أي موظفٍ فيه تسجيل الدخول بعد الآن.</p>
-          <p className="text-neutral-500">بياناته المحاسبية (المبيعات، المخزون، الخزنة...) لا تُحذف — يمكن لدعم أوقية استعادة الفرع لاحقًا عند الحاجة.</p>
+          <p className="text-neutral-500">بياناته المحاسبية (المبيعات، المخزون، الخزنة...) لا تُحذف — يمكن لدعم أونصة استعادة الفرع لاحقًا عند الحاجة.</p>
         </div>
 
         <div className="space-y-1.5">

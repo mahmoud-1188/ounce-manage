@@ -43,11 +43,11 @@ export default function LoginPage({ onLoggedIn }) {
         <div className="text-center space-y-1 mb-2">
           <img
             src="/brand/logo-mark-transparent.png"
-            alt="أوقية"
+            alt="أونصة"
             className="h-12 w-12 mx-auto"
           />
           <h1 className="text-lg font-semibold">الإدارة المركزية</h1>
-          <p className="text-xs text-neutral-400">أوقية — Oqiyyah</p>
+          <p className="text-xs text-neutral-400">أونصة — Awnsah</p>
         </div>
 
         <div className="space-y-1.5">
