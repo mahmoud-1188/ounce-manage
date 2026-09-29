@@ -29,7 +29,7 @@ const LAYOUT = {
     { key: "money", title: "المال", icon: Wallet, tone: "money",
       items: [["expenses", "المصروفات وعمولة البنك"], ["fiscal", "السنة المالية وإقفال الأشهر"], ["control", "الأسعار والإعلانات"], ["consolidated", "الميزان الموحّد"]] },
     { key: "reports", title: "التقارير", icon: BarChart3, tone: "reports",
-      items: [["report", "التقرير المجمّع"], ["analytics", "التحليلات"], ["consolidated", "الموحّد"], ["opsLog", "سجلّ عمليات الإدارة"], ["dashboard", "لوحة الإدارة"]] },
+      items: [["report", "التقرير المجمّع"], ["analytics", "التحليلات"], ["consolidated", "الموحّد"], ["zakat", "زكاة الفروع"], ["opsLog", "سجلّ عمليات الإدارة"], ["dashboard", "لوحة الإدارة"]] },
   ],
 };
 

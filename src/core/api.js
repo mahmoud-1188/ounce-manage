@@ -203,6 +203,8 @@ const storeApi = {
   createHqPurchase: (branchId, body) => apiFetch(`/store/branches/${branchId}/hq-purchase`, { method: "POST", body }),
   /** GET /store/consolidated?to=YYYY-MM-DD — الميزان الموحّد مفصّلًا على الفروع */
   fetchConsolidated: (to) => apiFetch(`/store/consolidated${to ? `?to=${to}` : ""}`),
+  /** GET /store/zakat?price24= — زكاة الفروع الموحّدة: كل فرعٍ بدالّته ثم المجموع */
+  fetchZakat: (price24) => apiFetch(`/store/zakat?price24=${Number(price24) || 0}`),
   /** GET /store/expenses-matrix?period=d30|mtd|ytd|all — المصروفات حساب × فرع */
   fetchExpensesMatrix: (period) => apiFetch(`/store/expenses-matrix?period=${period || "mtd"}`),
   /** GET /store/bank-fees?period=YYYY-MM — عمولة الشبكة المسجّلة والمسوّاة لكل فرع */
