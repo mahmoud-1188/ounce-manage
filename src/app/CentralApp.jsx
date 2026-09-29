@@ -116,6 +116,7 @@ export default function CentralApp() {
             branchId={openBranch.id}
             branchName={openBranch.name}
             canManageBranches={storeUser?.role === "owner" || !!storeUser?.canManageBranches}
+            canCode={storeUser?.role === "owner" || !!storeUser?.canSendCoding}
             onBack={closeBranchDetail}
           />
         ) : tab === "home" ? (
