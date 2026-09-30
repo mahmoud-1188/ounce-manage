@@ -1,4 +1,4 @@
-import { LayoutDashboard, Building2, BarChart3, LineChart, Users, Send, SlidersHorizontal, Scale, Receipt, ShieldCheck, LockKeyhole, CalendarCheck, Network, History, Landmark } from "lucide-react";
+import { Inbox, FolderCog, LayoutDashboard, Building2, BarChart3, LineChart, Users, Send, SlidersHorizontal, Scale, Receipt, ShieldCheck, LockKeyhole, CalendarCheck, Network, History, Landmark } from "lucide-react";
 
 /**
  * سجلّ شاشات التطبيق المركزي — نظير NAV_REGISTRY في ounce-frontend.
@@ -73,4 +73,30 @@ function effectivePages(storeUser) {
   return PAGE_REGISTRY.filter((p) => storeUser.allowedPages.includes(p.id)).map((p) => p.id);
 }
 
-export { PAGE_REGISTRY, USERS_PAGE, effectivePages };
+/**
+ * أبواب الإدارة (المرجع م4): الشاشات مجمّعةٌ في أبوابٍ بدل ستة عشر تبويبًا في شريطٍ يُمرَّر.
+ * كل شاشةٍ في بابٍ واحد؛ الشريط العلوي أبوابٌ، وتحته شاشات الباب المفتوح. وقائمة ☰ في
+ * «البسيط» بالأبواب نفسها. الصلاحية كما هي: بابٌ بلا شاشةٍ مسموحة لا يظهر.
+ */
+const HQ_HUBS = [
+  { key: "branches", label: "الفروع", icon: Building2, pages: ["home", "branches"] },
+  { key: "inbox", label: "الوارد", icon: Inbox, pages: ["approvals", "hqDocs"] },
+  { key: "control", label: "التحكّم والإرسال", icon: SlidersHorizontal, pages: ["control", "policy"] },
+  { key: "money", label: "المال", icon: Receipt, pages: ["expenses", "consolidated", "fiscal"] },
+  { key: "reports", label: "التقارير", icon: BarChart3, pages: ["report", "analytics", "zakat"] },
+  { key: "admin", label: "الإدارة", icon: FolderCog, pages: ["org", "opsLog", "users"] },
+];
+
+/** الأبواب بشاشاتها المسموحة (`users` للمالك وحده). */
+function visibleHubs(storeUser) {
+  const allowed = new Set(effectivePages(storeUser));
+  if (storeUser?.role === "owner") allowed.add("users");
+  const byId = new Map([...PAGE_REGISTRY, USERS_PAGE].map((p) => [p.id, p]));
+  return HQ_HUBS
+    .map((h) => ({ ...h, pages: h.pages.filter((id) => allowed.has(id)).map((id) => byId.get(id)) }))
+    .filter((h) => h.pages.length);
+}
+
+const hubOfPage = (id) => HQ_HUBS.find((h) => h.pages.includes(id)) || null;
+
+export { HQ_HUBS, PAGE_REGISTRY, USERS_PAGE, effectivePages, hubOfPage, visibleHubs };

@@ -22,7 +22,7 @@ import SimpleHqHome from "../ui/SimpleHqHome.jsx";
 import DesignPicker from "../ui/DesignPicker.jsx";
 import { applyDesign, loadDesign, saveDesign } from "../core/design.js";
 import { ChevronRight, LogOut, Menu, X } from "lucide-react";
-import { PAGE_REGISTRY, USERS_PAGE, effectivePages } from "../core/pageRegistry.js";
+import { effectivePages, visibleHubs } from "../core/pageRegistry.js";
 
 /**
  * تطبيق الإدارة المركزية — نقطة الدخول.
@@ -158,7 +158,6 @@ export default function CentralApp() {
 
   // ── البسيط: صفحةٌ واحدة بلا تبويبات — ☰ يحمل كل شاشة والشكل، وكل شاشةٍ ترجع للرئيسية ──
   if (design === "simple") {
-    const menuPages = [...PAGE_REGISTRY.filter((p) => allowed.includes(p.id)), ...(storeUser?.role === "owner" ? [USERS_PAGE] : [])];
     const atHome = !openBranch && tab === "home";
     return (
       <div className="min-h-screen text-neutral-100" style={{ background: "#1B1A17", color: "#F1ECE2" }}>
@@ -195,15 +194,20 @@ export default function CentralApp() {
                 <button type="button" onClick={() => setMenuOpen(false)} aria-label="إغلاق"><X size={20} /></button>
               </div>
               <div className="flex flex-col gap-1 mb-4">
-                {menuPages.map((p) => {
-                  const Icon = p.icon;
-                  return (
-                    <button key={p.id} type="button" onClick={() => go(p.id)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-start"
-                      style={{ background: tab === p.id && !openBranch ? "#2E2A20" : "transparent", color: tab === p.id ? "#E4C47D" : "#F1ECE2" }}>
-                      <Icon size={17} /> {p.label}
-                    </button>
-                  );
-                })}
+                {visibleHubs(storeUser).map((h) => (
+                  <div key={h.key} className="mb-2">
+                    <div className="text-[11px] font-bold px-3 pt-1 pb-0.5" style={{ color: "#D9B566" }}>{h.label}</div>
+                  {h.pages.map((p) => {
+                    const Icon = p.icon;
+                    return (
+                      <button key={p.id} type="button" onClick={() => go(p.id)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-start"
+                        style={{ background: tab === p.id && !openBranch ? "#2E2A20" : "transparent", color: tab === p.id ? "#E4C47D" : "#F1ECE2" }}>
+                        <Icon size={17} /> {p.label}
+                      </button>
+                    );
+                  })}
+                  </div>
+                ))}
               </div>
               <div className="text-xs font-bold mb-2" style={{ color: "#D9B566" }}>شكل التطبيق</div>
               <DesignPicker design={design} onChange={(d) => { setMenuOpen(false); changeDesign(d); }} />
