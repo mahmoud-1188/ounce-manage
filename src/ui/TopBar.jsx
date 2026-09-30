@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { LogOut, Palette } from "lucide-react";
 import DesignPicker from "./DesignPicker.jsx";
-import { PAGE_REGISTRY, USERS_PAGE, effectivePages } from "../core/pageRegistry.js";
+import { hubOfPage, visibleHubs } from "../core/pageRegistry.js";
 
 export default function TopBar({ storeUser, tab, onTabChange, onLogout, design, onDesign }) {
   const [showDesign, setShowDesign] = useState(false);
-  const allowed = effectivePages(storeUser);
-  const visiblePages = PAGE_REGISTRY.filter((p) => allowed.includes(p.id));
-  const tabs = storeUser?.role === "owner" ? [...visiblePages, USERS_PAGE] : visiblePages;
+  const hubs = visibleHubs(storeUser);
+  const current = hubs.find((h) => h.key === hubOfPage(tab)?.key) || null;
 
   return (
     <header className={`border-b border-neutral-800 ${design === "radiant" ? "bg-neutral-900/60 backdrop-blur" : "bg-neutral-900"}`}>
@@ -44,21 +43,36 @@ export default function TopBar({ storeUser, tab, onTabChange, onLogout, design, 
           خروج
         </button>
 
-        <nav className="flex items-center gap-1 bg-neutral-800/60 rounded-lg p-1 overflow-x-auto min-w-0 w-full sm:w-auto order-3 sm:order-2">
-          {tabs.map((p) => {
-            const Icon = p.icon;
+        <nav aria-label="أبواب الإدارة" className="flex items-center gap-1 bg-neutral-800/60 rounded-lg p-1 overflow-x-auto min-w-0 w-full sm:w-auto order-3 sm:order-2">
+          {hubs.map((h) => {
+            const Icon = h.icon;
             return (
               <TabButton
-                key={p.id}
-                active={tab === p.id}
-                onClick={() => onTabChange(p.id)}
+                key={h.key}
+                active={current?.key === h.key}
+                onClick={() => { if (current?.key !== h.key) onTabChange(h.pages[0].id); }}
                 icon={<Icon size={16} />}
-                label={p.label}
+                label={h.label}
               />
             );
           })}
         </nav>
       </div>
+      {/* شاشات الباب المفتوح — لا صفّ لبابٍ بشاشةٍ واحدة */}
+      {current && current.pages.length > 1 && (
+        <div className="max-w-6xl mx-auto px-4 pb-2 flex gap-1 overflow-x-auto" aria-label={`شاشات ${current.label}`}>
+          {current.pages.map((p) => {
+            const Icon = p.icon;
+            const on = tab === p.id;
+            return (
+              <button key={p.id} type="button" onClick={() => { if (!on) onTabChange(p.id); }} aria-current={on ? "page" : undefined}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs shrink-0 ${on ? "bg-neutral-800 text-neutral-100 font-semibold" : "text-neutral-400 hover:text-neutral-100"}`}>
+                <Icon size={13} /> {p.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </header>
   );
 }
