@@ -11,6 +11,7 @@ import BranchProvisionCard from "./BranchProvisionCard.jsx";
 import HqPurchaseCard from "./HqPurchaseCard.jsx";
 import RemoteStocktakeCard from "./RemoteStocktakeCard.jsx";
 import BranchDevicesCard from "./BranchDevicesCard.jsx";
+import BranchRemnantsCard from "./BranchRemnantsCard.jsx";
 
 const numberFmt = new Intl.NumberFormat("ar-EG", { maximumFractionDigits: 2 });
 
@@ -35,7 +36,7 @@ function currentPeriod() {
  * يُطلب بعد. ما هنا اليوم: كل رقم فعليًّا موجود في التقرير المجمّع
  * الحالي، معروضًا لفرعٍ واحد بدل كل الفروع معًا.
  */
-export default function BranchDetailPage({ branchId, branchName, canManageBranches, onBack, onDeleted }) {
+export default function BranchDetailPage({ branchId, branchName, canManageBranches, canCode = false, onBack, onDeleted }) {
   const [period, setPeriod] = useState(currentPeriod());
   const [branch, setBranch] = useState(null);
   const [notFound, setNotFound] = useState(false);
@@ -120,6 +121,7 @@ export default function BranchDetailPage({ branchId, branchName, canManageBranch
           <BranchProvisionCard branchId={branchId} canManage={canManageBranches} />
           {canManageBranches && <HqPurchaseCard branchId={branchId} />}
           {canManageBranches && <RemoteStocktakeCard branchId={branchId} />}
+          <BranchRemnantsCard branchId={branchId} canCode={canCode} />
           <BranchBooksCard branchId={branchId} />
           <BranchAccountsCard branchId={branchId} canManage={canManageBranches} />
 

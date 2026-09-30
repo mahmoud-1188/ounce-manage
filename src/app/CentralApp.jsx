@@ -10,6 +10,7 @@ import UsersPage from "../pages/UsersPage.jsx";
 import HqDocsPage from "../pages/HqDocsPage.jsx";
 import ControlPage from "../pages/ControlPage.jsx";
 import ConsolidatedPage from "../pages/ConsolidatedPage.jsx";
+import ZakatPage from "../pages/ZakatPage.jsx";
 import ExpensesPage from "../pages/ExpensesPage.jsx";
 import ApprovalsPage from "../pages/ApprovalsPage.jsx";
 import PolicyPage from "../pages/PolicyPage.jsx";
@@ -115,6 +116,7 @@ export default function CentralApp() {
             branchId={openBranch.id}
             branchName={openBranch.name}
             canManageBranches={storeUser?.role === "owner" || !!storeUser?.canManageBranches}
+            canCode={storeUser?.role === "owner" || !!storeUser?.canSendCoding}
             onBack={closeBranchDetail}
           />
         ) : tab === "home" ? (
@@ -134,6 +136,8 @@ export default function CentralApp() {
           <ControlPage canManage={storeUser?.role === "owner" || !!storeUser?.canManageBranches} />
         ) : tab === "consolidated" ? (
           <ConsolidatedPage />
+        ) : tab === "zakat" ? (
+          <ZakatPage />
         ) : tab === "expenses" ? (
           <ExpensesPage canManage={storeUser?.role === "owner" || !!storeUser?.canManageBranches} />
         ) : tab === "approvals" ? (

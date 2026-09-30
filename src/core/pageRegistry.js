@@ -1,4 +1,4 @@
-import { LayoutDashboard, Building2, BarChart3, LineChart, Users, Send, SlidersHorizontal, Scale, Receipt, ShieldCheck, LockKeyhole, CalendarCheck, Network, History } from "lucide-react";
+import { LayoutDashboard, Building2, BarChart3, LineChart, Users, Send, SlidersHorizontal, Scale, Receipt, ShieldCheck, LockKeyhole, CalendarCheck, Network, History, Landmark } from "lucide-react";
 
 /**
  * سجلّ شاشات التطبيق المركزي — نظير NAV_REGISTRY في ounce-frontend.
@@ -50,6 +50,8 @@ const PAGE_REGISTRY = [
   // لوحة الإدارة (المركزي المعدّل): الميزان الموحّد · مصروفات الفروع وعمولة
   // البنك مركزيًّا · الاعتمادات (من يعتمد ماذا + صندوق الطلبات)
   { id: "consolidated", label: "الموحّد", icon: Scale },
+  // المرجع 5.2.0 (قرار المالك 2026-09-29): زكاة الفروع — كل فرعٍ على سطره ثم إجمالي المجموعة
+  { id: "zakat", label: "زكاة الفروع", icon: Landmark },
   { id: "expenses", label: "المصروفات", icon: Receipt },
   { id: "approvals", label: "الاعتمادات", icon: ShieldCheck },
   // الشاشات والعمليات: ما تمنعه الإدارة أو تمنحه لكل دور في الفروع
