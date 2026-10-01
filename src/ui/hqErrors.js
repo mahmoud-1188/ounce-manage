@@ -33,6 +33,11 @@ const HQ_ERRORS = {
   invalid_entry: "عددٌ غير صالح",
   item_not_found: "صنفٌ غير موجود في الفرع",
   invalid_hq_role: "دورٌ غير معروف",
+  lot_not_at_hq: "الدفعة لم تعد عند الإدارة — استرجعها الفرع",
+  lot_not_open: "الدفعة مقفلة",
+  invalid_rows: "أكمل التصنيف والوزن لكل صنف",
+  invalid_model: "نموذجٌ غير معروف",
+  category_not_found: "تصنيفٌ غير موجود في الفرع",
 };
 
 export function hqError(err, fallback = "تعذّر تنفيذ العملية") {
