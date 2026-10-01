@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Banknote, CheckCircle2, ClipboardList, Send, X } from "lucide-react";
 import { storeApi, ApiError } from "../core/api.js";
 import CashTransitCard from "./CashTransitCard.jsx";
+import GoodsTransitCard from "./GoodsTransitCard.jsx";
+import CodingQueueCard from "./CodingQueueCard.jsx";
 
 const numberFmt = new Intl.NumberFormat("ar-EG", { maximumFractionDigits: 2 });
 function fmt(n) {
@@ -105,6 +107,8 @@ export default function HqDocsPage({ storeUser }) {
       )}
 
       <CashTransitCard reloadKey={reloadKey} />
+      <GoodsTransitCard reloadKey={reloadKey} />
+      <CodingQueueCard canCode={canSendCoding} canManage={canManage} />
 
       {txns === null && !error ? (
         <div className="text-neutral-400 text-sm">جارِ التحميل…</div>

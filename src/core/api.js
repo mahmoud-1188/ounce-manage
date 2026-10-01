@@ -200,11 +200,15 @@ const storeApi = {
   /** GET /store/alerts — «يحتاج انتباهك الآن» لكل الفروع (block/warn/info) */
   fetchAlerts: () => apiFetch("/store/alerts"),
   fetchCashTransit: () => apiFetch("/store/cash-transit"),
+  fetchGoodsTransit: () => apiFetch("/store/goods-transit"),
   createHqPurchase: (branchId, body) => apiFetch(`/store/branches/${branchId}/hq-purchase`, { method: "POST", body }),
   /** GET /store/consolidated?to=YYYY-MM-DD — الميزان الموحّد مفصّلًا على الفروع */
   fetchConsolidated: (to) => apiFetch(`/store/consolidated${to ? `?to=${to}` : ""}`),
   /** بقايا الأطقم في فرع وتكويدها من الإدارة */
   fetchRemnants: (branchId) => apiFetch(`/store/branches/${branchId}/remnants`),
+  fetchCodingQueue: () => apiFetch("/store/coding-queue"),
+  codeLot: (branchId, lotId, rows) => apiFetch(`/store/branches/${branchId}/lots/${lotId}/items`, { method: "POST", body: { rows } }),
+  setCodingModel: (branchId, model) => apiFetch(`/store/branches/${branchId}/coding-model`, { method: "POST", body: { model } }),
   codeRemnant: (branchId, itemId, pieces) => apiFetch(`/store/branches/${branchId}/remnants/${itemId}/code`, { method: "POST", body: { pieces } }),
   /** GET /store/zakat?price24= — زكاة الفروع الموحّدة: كل فرعٍ بدالّته ثم المجموع */
   fetchZakat: (price24) => apiFetch(`/store/zakat?price24=${Number(price24) || 0}`),
