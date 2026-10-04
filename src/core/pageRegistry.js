@@ -65,12 +65,16 @@ const PAGE_REGISTRY = [
 const USERS_PAGE = { id: "users", label: "الموظفون", icon: Users };
 
 /** الصفحات الفعلية المسموحة لمستخدمٍ مركزي: owner كل شيء دائمًا، staff حسب allowedPages (null = بلا قيد أيضًا). */
+// باقة «بدون محاسبة» (migration 070 في الخادم): شاشات الإدارة المحاسبية تُخفى (والخادم يرفض مساراتها)
+const ACCOUNTING_PAGES = ["consolidated", "fiscal", "zakat"];
+const noAccounting = (storeUser) => storeUser?.storePackage === "no_accounting";
+
 function effectivePages(storeUser) {
   if (!storeUser) return [];
-  if (storeUser.role === "owner" || storeUser.allowedPages == null) {
-    return PAGE_REGISTRY.map((p) => p.id);
-  }
-  return PAGE_REGISTRY.filter((p) => storeUser.allowedPages.includes(p.id)).map((p) => p.id);
+  const pages = storeUser.role === "owner" || storeUser.allowedPages == null
+    ? PAGE_REGISTRY.map((p) => p.id)
+    : PAGE_REGISTRY.filter((p) => storeUser.allowedPages.includes(p.id)).map((p) => p.id);
+  return noAccounting(storeUser) ? pages.filter((id) => !ACCOUNTING_PAGES.includes(id)) : pages;
 }
 
 /**
@@ -99,4 +103,4 @@ function visibleHubs(storeUser) {
 
 const hubOfPage = (id) => HQ_HUBS.find((h) => h.pages.includes(id)) || null;
 
-export { HQ_HUBS, PAGE_REGISTRY, USERS_PAGE, effectivePages, hubOfPage, visibleHubs };
+export { HQ_HUBS, PAGE_REGISTRY, USERS_PAGE, effectivePages, hubOfPage, visibleHubs, noAccounting };

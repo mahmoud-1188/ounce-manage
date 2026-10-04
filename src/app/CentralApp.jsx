@@ -22,7 +22,7 @@ import SimpleHqHome from "../ui/SimpleHqHome.jsx";
 import DesignPicker from "../ui/DesignPicker.jsx";
 import { applyDesign, loadDesign, saveDesign } from "../core/design.js";
 import { ChevronRight, LogOut, Menu, X } from "lucide-react";
-import { effectivePages, visibleHubs } from "../core/pageRegistry.js";
+import { effectivePages, noAccounting, visibleHubs } from "../core/pageRegistry.js";
 
 /**
  * تطبيق الإدارة المركزية — نقطة الدخول.
@@ -117,6 +117,7 @@ export default function CentralApp() {
             branchName={openBranch.name}
             canManageBranches={storeUser?.role === "owner" || !!storeUser?.canManageBranches}
             canCode={storeUser?.role === "owner" || !!storeUser?.canSendCoding}
+            showBooks={!noAccounting(storeUser)}
             onBack={closeBranchDetail}
           />
         ) : tab === "home" ? (

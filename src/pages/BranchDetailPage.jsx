@@ -36,7 +36,7 @@ function currentPeriod() {
  * يُطلب بعد. ما هنا اليوم: كل رقم فعليًّا موجود في التقرير المجمّع
  * الحالي، معروضًا لفرعٍ واحد بدل كل الفروع معًا.
  */
-export default function BranchDetailPage({ branchId, branchName, canManageBranches, canCode = false, onBack, onDeleted }) {
+export default function BranchDetailPage({ branchId, branchName, canManageBranches, canCode = false, showBooks = true, onBack, onDeleted }) {
   const [period, setPeriod] = useState(currentPeriod());
   const [branch, setBranch] = useState(null);
   const [notFound, setNotFound] = useState(false);
@@ -122,7 +122,7 @@ export default function BranchDetailPage({ branchId, branchName, canManageBranch
           {canManageBranches && <HqPurchaseCard branchId={branchId} />}
           {canManageBranches && <RemoteStocktakeCard branchId={branchId} />}
           <BranchRemnantsCard branchId={branchId} canCode={canCode} />
-          <BranchBooksCard branchId={branchId} />
+          {showBooks && <BranchBooksCard branchId={branchId} />}
           <BranchAccountsCard branchId={branchId} canManage={canManageBranches} />
 
           {canManageBranches && <BranchDevicesCard branchId={branchId} />}
