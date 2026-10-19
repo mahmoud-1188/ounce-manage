@@ -211,6 +211,9 @@ const storeApi = {
   fetchRemnants: (branchId) => apiFetch(`/store/branches/${branchId}/remnants`),
   fetchCodingQueue: () => apiFetch("/store/coding-queue"),
   codeLot: (branchId, lotId, rows) => apiFetch(`/store/branches/${branchId}/lots/${lotId}/items`, { method: "POST", body: { rows } }),
+  /** مراجعة دورة التكويد: إلغاء قطعةٍ كُوِّدت خطأً، ثم «أنهِ وأرسل للفرع» */
+  uncodeLotPieces: (branchId, lotId, codes) => apiFetch(`/store/branches/${branchId}/lots/${lotId}/uncode`, { method: "POST", body: { codes } }),
+  shipCodedLot: (branchId, lotId) => apiFetch(`/store/branches/${branchId}/lots/${lotId}/ship`, { method: "POST" }),
   setCodingModel: (branchId, model) => apiFetch(`/store/branches/${branchId}/coding-model`, { method: "POST", body: { model } }),
   codeRemnant: (branchId, itemId, pieces) => apiFetch(`/store/branches/${branchId}/remnants/${itemId}/code`, { method: "POST", body: { pieces } }),
   /** GET /store/zakat?price24= — زكاة الفروع الموحّدة: كل فرعٍ بدالّته ثم المجموع */

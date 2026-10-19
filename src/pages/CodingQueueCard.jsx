@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Barcode, Plus, Trash2 } from "lucide-react";
+import { Barcode, Plus, Send, Trash2, X } from "lucide-react";
 import { storeApi } from "../core/api.js";
 import { hqError } from "../ui/hqErrors.js";
 
@@ -8,7 +8,7 @@ const MODELS = [["both", "الفرع والإدارة"], ["branch", "الفرع 
 
 /**
  * التكويد في الإدارة: دفعاتٌ أرسلتها الفروع لتكوّدها الإدارة — تبقى ملك الفرع (وزنها في مخزونه) حتى تعود قطعًا
- * تظهر في مخزونه مباشرةً. بمعالج تكويد الفرع نفسه (الأجرة المتبقية للدفعة تُوزَّع بالوزن). ونموذج كل فرع: من يكوّد.
+ * تُراجَع هنا ثم تُرسل للفرع — ولا تُباع هناك قبل الإرسال. بمعالج تكويد الفرع نفسه (الأجرة المتبقية للدفعة تُوزَّع بالوزن). ونموذج كل فرع: من يكوّد.
  */
 export default function CodingQueueCard({ canCode = false, canManage = false }) {
   const [d, setD] = useState(null);
@@ -30,6 +30,20 @@ export default function CodingQueueCard({ canCode = false, canManage = false }) 
     } catch (e) {
       setMsg({ bad: true, text: hqError(e, "تعذّر التكويد") });
     } finally { setBusy(false); }
+  };
+  // مراجعة القطع قبل الشحن: ما كُوِّد خطأً يعود وزنه للدفعة، ثم تُرسل الدفعة للفرع فتُباع هناك
+  const uncode = async (b, l, code) => {
+    if (!window.confirm(`إلغاء تكويد ${code}؟ يعود وزنه «لم يُكوَّد» في ${l.ref}.`)) return;
+    setMsg(null);
+    try { await storeApi.uncodeLotPieces(b.id, l.id, [code]); setMsg({ text: `أُلغي تكويد ${code} — عاد وزنه للدفعة` }); load(); }
+    catch (e) { setMsg({ bad: true, text: hqError(e, "تعذّر إلغاء التكويد") }); }
+  };
+  const ship = async (b, l) => {
+    if (!window.confirm(`إرسال ${l.pieces.length} قطعة من ${l.ref} إلى ${b.name}؟ بعدها تُباع في الفرع ولا تُراجَع هنا.`)) return;
+    setBusy(true); setMsg(null);
+    try { const r = await storeApi.shipCodedLot(b.id, l.id); setMsg({ text: `أُرسلت ${r.pieces} قطعة من ${l.ref} لفرع ${b.name}` }); load(); }
+    catch (e) { setMsg({ bad: true, text: hqError(e, "تعذّر الإرسال") }); }
+    finally { setBusy(false); }
   };
   const setModel = async (b, model) => {
     setMsg(null);
@@ -76,6 +90,27 @@ export default function CodingQueueCard({ canCode = false, canManage = false }) 
                       className="text-xs font-bold px-3 py-1.5 rounded-lg bg-amber-500 text-neutral-950">كوّد</button>
                   )}
                 </div>
+                {(l.pieces || []).length > 0 && (
+                  <div className="mt-2 space-y-1" data-review-lot={l.ref}>
+                    <div className="text-xs text-neutral-400">مراجعة ما كُوِّد قبل الإرسال ({l.pieces.length} قطعة · {wf.format(l.codedWeight)} جم)</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {l.pieces.map((p) => (
+                        <span key={p.code} data-review-piece={p.code} className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg border border-neutral-700">
+                          <span dir="ltr">{p.code}</span><span className="text-neutral-500">{p.category} · {wf.format(p.weight)}</span>
+                          {canCode && !p.sold && (
+                            <button type="button" onClick={() => uncode(b, l, p.code)} aria-label={`إلغاء تكويد ${p.code}`} className="text-neutral-500 hover:text-red-400"><X size={12} /></button>
+                          )}
+                        </span>
+                      ))}
+                    </div>
+                    {canCode && open !== l.id && (
+                      <button type="button" data-ship-lot={l.ref} disabled={busy} onClick={() => ship(b, l)}
+                        className="w-full mt-1 text-xs font-bold py-1.5 rounded-lg border border-amber-500/60 text-amber-400 flex items-center justify-center gap-1 disabled:opacity-40">
+                        <Send size={12} /> أنهِ وأرسل للفرع{l.remaining > 0.0005 ? ` (يبقى ${wf.format(l.remaining)} جم يكوّده الفرع)` : ""}
+                      </button>
+                    )}
+                  </div>
+                )}
                 {open === l.id && (
                   <div className="mt-2 space-y-2">
                     {rows.map((x, i) => (
