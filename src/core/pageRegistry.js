@@ -1,4 +1,4 @@
-import { Bug, Inbox, FolderCog, LayoutDashboard, Building2, BarChart3, LineChart, Users, Send, SlidersHorizontal, Scale, Receipt, ShieldCheck, LockKeyhole, CalendarCheck, Network, History, Landmark } from "lucide-react";
+import { Bug, KeyRound, Inbox, FolderCog, LayoutDashboard, Building2, BarChart3, LineChart, Users, Send, SlidersHorizontal, Scale, Receipt, ShieldCheck, LockKeyhole, CalendarCheck, Network, History, Landmark } from "lucide-react";
 
 /**
  * سجلّ شاشات التطبيق المركزي — نظير NAV_REGISTRY في ounce-frontend.
@@ -62,6 +62,7 @@ const PAGE_REGISTRY = [
   { id: "org", label: "الهيكل", icon: Network },
   { id: "opsLog", label: "سجلّ الإدارة", icon: History },
   { id: "clientErrors", label: "أعطال الفروع", icon: Bug },
+  { id: "apiKeys", label: "الواجهة البرمجية", icon: KeyRound },
 ];
 
 const USERS_PAGE = { id: "users", label: "الموظفون", icon: Users };
@@ -90,7 +91,7 @@ const HQ_HUBS = [
   { key: "control", label: "التحكّم والإرسال", icon: SlidersHorizontal, pages: ["control", "policy"] },
   { key: "money", label: "المال", icon: Receipt, pages: ["expenses", "consolidated", "fiscal"] },
   { key: "reports", label: "التقارير", icon: BarChart3, pages: ["report", "analytics", "zakat", "netWeight"] },
-  { key: "admin", label: "الإدارة", icon: FolderCog, pages: ["org", "opsLog", "clientErrors", "users"] },
+  { key: "admin", label: "الإدارة", icon: FolderCog, pages: ["org", "opsLog", "clientErrors", "apiKeys", "users"] },
 ];
 
 /** الأبواب بشاشاتها المسموحة (`users` للمالك وحده). */

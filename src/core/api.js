@@ -13,6 +13,7 @@
 // مباشرة عند فتحها بدل تحميل كل شيء دفعة واحدة عند الدخول.
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+export { API_BASE };
 
 // ⚠ مفتاح تخزين مختلف عمدًا عن ounce_auth_token_v1 (تطبيق الفرع) — توكن
 // مستخدم مركزي (scope: "store") وتوكن مستخدم فرع (scope: "branch") لا
@@ -217,6 +218,10 @@ const storeApi = {
   setCodingModel: (branchId, model) => apiFetch(`/store/branches/${branchId}/coding-model`, { method: "POST", body: { model } }),
   codeRemnant: (branchId, itemId, pieces) => apiFetch(`/store/branches/${branchId}/remnants/${itemId}/code`, { method: "POST", body: { pieces } }),
   /** GET /store/zakat?price24= — زكاة الفروع الموحّدة: كل فرعٍ بدالّته ثم المجموع */
+  /** مفاتيح الواجهة البرمجية العامّة (migration 083) — للمالك */
+  fetchApiKeys: () => apiFetch("/store/api-keys"),
+  createApiKey: (label, scope = "ALL") => apiFetch("/store/api-keys", { method: "POST", body: { label, scope } }),
+  revokeApiKey: (id) => apiFetch(`/store/api-keys/${id}/revoke`, { method: "POST" }),
   /** أعطال الفروع (migration 082) */
   fetchClientErrors: (all = false) => apiFetch(`/store/client-errors${all ? "?all=1" : ""}`),
   resolveClientError: (id, note = "") => apiFetch(`/store/client-errors/${id}/resolve`, { method: "POST", body: { note } }),
