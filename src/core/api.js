@@ -147,6 +147,9 @@ const storeApi = {
    * PATCH /store/branches/:branchId/lock { locked, reason } — قفل الفرع من
    * الإدارة: الخادم يرفض كل طلباته (423 branch_locked) حتى يُفكّ.
    */
+  // التفويض بضغطة (migration 072)
+  fetchDelegation: (branchId) => apiFetch(`/store/branches/${branchId}/delegation`),
+  setDelegation: (branchId, patch) => apiFetch(`/store/branches/${branchId}/delegation`, { method: "POST", body: patch }),
   setBranchLock: (branchId, locked, reason) =>
     apiFetch(`/store/branches/${branchId}/lock`, { method: "PATCH", body: { locked, reason } }),
 

@@ -4,6 +4,7 @@ import { storeApi, ApiError } from "../core/api.js";
 import BranchStaffSection from "./BranchStaffSection.jsx";
 import BranchLinkCard from "./BranchLinkCard.jsx";
 import BranchLockCard from "./BranchLockCard.jsx";
+import BranchDelegationCard from "./BranchDelegationCard.jsx";
 import BranchOpsCard from "./BranchOpsCard.jsx";
 import BranchBooksCard from "./BranchBooksCard.jsx";
 import BranchAccountsCard from "./BranchAccountsCard.jsx";
@@ -104,6 +105,7 @@ export default function BranchDetailPage({ branchId, branchName, canManageBranch
 
           {canManageBranches && <BranchLinkCard branchRef={branch.branchRef} />}
           {canManageBranches && <BranchLockCard branchId={branchId} />}
+          {canManageBranches && <BranchDelegationCard branchId={branchId} />}
           {canManageBranches && <BranchOpsCard branchId={branchId} />}
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
