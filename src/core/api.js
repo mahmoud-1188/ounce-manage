@@ -13,6 +13,7 @@
 // مباشرة عند فتحها بدل تحميل كل شيء دفعة واحدة عند الدخول.
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+export { API_BASE };
 
 // ⚠ مفتاح تخزين مختلف عمدًا عن ounce_auth_token_v1 (تطبيق الفرع) — توكن
 // مستخدم مركزي (scope: "store") وتوكن مستخدم فرع (scope: "branch") لا
@@ -147,6 +148,9 @@ const storeApi = {
    * PATCH /store/branches/:branchId/lock { locked, reason } — قفل الفرع من
    * الإدارة: الخادم يرفض كل طلباته (423 branch_locked) حتى يُفكّ.
    */
+  // التفويض بضغطة (migration 072)
+  fetchDelegation: (branchId) => apiFetch(`/store/branches/${branchId}/delegation`),
+  setDelegation: (branchId, patch) => apiFetch(`/store/branches/${branchId}/delegation`, { method: "POST", body: patch }),
   setBranchLock: (branchId, locked, reason) =>
     apiFetch(`/store/branches/${branchId}/lock`, { method: "PATCH", body: { locked, reason } }),
 
@@ -208,9 +212,21 @@ const storeApi = {
   fetchRemnants: (branchId) => apiFetch(`/store/branches/${branchId}/remnants`),
   fetchCodingQueue: () => apiFetch("/store/coding-queue"),
   codeLot: (branchId, lotId, rows) => apiFetch(`/store/branches/${branchId}/lots/${lotId}/items`, { method: "POST", body: { rows } }),
+  /** مراجعة دورة التكويد: إلغاء قطعةٍ كُوِّدت خطأً، ثم «أنهِ وأرسل للفرع» */
+  uncodeLotPieces: (branchId, lotId, codes) => apiFetch(`/store/branches/${branchId}/lots/${lotId}/uncode`, { method: "POST", body: { codes } }),
+  shipCodedLot: (branchId, lotId) => apiFetch(`/store/branches/${branchId}/lots/${lotId}/ship`, { method: "POST" }),
   setCodingModel: (branchId, model) => apiFetch(`/store/branches/${branchId}/coding-model`, { method: "POST", body: { model } }),
   codeRemnant: (branchId, itemId, pieces) => apiFetch(`/store/branches/${branchId}/remnants/${itemId}/code`, { method: "POST", body: { pieces } }),
   /** GET /store/zakat?price24= — زكاة الفروع الموحّدة: كل فرعٍ بدالّته ثم المجموع */
+  /** مفاتيح الواجهة البرمجية العامّة (migration 083) — للمالك */
+  fetchApiKeys: () => apiFetch("/store/api-keys"),
+  createApiKey: (label, scope = "ALL") => apiFetch("/store/api-keys", { method: "POST", body: { label, scope } }),
+  revokeApiKey: (id) => apiFetch(`/store/api-keys/${id}/revoke`, { method: "POST" }),
+  /** أعطال الفروع (migration 082) */
+  fetchClientErrors: (all = false) => apiFetch(`/store/client-errors${all ? "?all=1" : ""}`),
+  resolveClientError: (id, note = "") => apiFetch(`/store/client-errors/${id}/resolve`, { method: "POST", body: { note } }),
+  /** GET /store/net-weight — صافي كل فرعٍ بالوزن بعد الالتزامات ثم المجموع */
+  fetchNetWeight: (price24, karat = 21) => apiFetch(`/store/net-weight?price24=${Number(price24) || 0}&karat=${karat}`),
   fetchZakat: (price24) => apiFetch(`/store/zakat?price24=${Number(price24) || 0}`),
   /** GET /store/expenses-matrix?period=d30|mtd|ytd|all — المصروفات حساب × فرع */
   fetchExpensesMatrix: (period) => apiFetch(`/store/expenses-matrix?period=${period || "mtd"}`),
@@ -293,6 +309,8 @@ const storeApi = {
 
   /** POST /store/hq-transactions/cash { toBranchId, fromBranchId?, amount, note } — نقدٌ من خزنة المصدر إلى خزنة فرع */
   sendHqCash: (payload) => apiFetch("/store/hq-transactions/cash", { method: "POST", body: payload }),
+  /** POST /store/hq-transactions/capital-draw { branchId, amount, note } — سحبٌ من رأس مال الفرع ينتظر موافقة مديره */
+  requestCapitalDraw: (payload) => apiFetch("/store/hq-transactions/capital-draw", { method: "POST", body: payload }),
 
   /** POST /store/hq-transactions/:id/receive — تستلم الإدارة (goods_to_hq/taskir_to_hq/cash_transfer). */
   receiveHqTransaction: (id) => apiFetch(`/store/hq-transactions/${id}/receive`, { method: "POST" }),

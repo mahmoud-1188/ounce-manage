@@ -25,7 +25,7 @@ export default function BranchLockCard({ branchId }) {
 
   const toggle = async () => {
     const next = !state?.locked;
-    if (next && !reason.trim()) { setError("اكتب سبب القفل — يظهر للفرع على شاشة القفل"); return; }
+    if (next && !reason.trim()) { setError("اكتب سبب القفل — للإدارة وحدها، والفرع يرى «النظام غير متاح حاليًا»"); return; }
     setBusy(true);
     setError("");
     try {
@@ -56,12 +56,12 @@ export default function BranchLockCard({ branchId }) {
       ) : (
         <>
           <p className="text-xs text-neutral-500">
-            يحجب كل شاشات الفرع ويرفض الخادم كل طلباته حتى يُفكّ — للمراجعة أو التحقيق أو إيقاف فرعٍ مؤقتًا.
+            يحجب كل شاشات الفرع ويرفض الخادم كل طلباته حتى يُفكّ. الفرع يرى «النظام غير متاح حاليًا» وحده — بلا سببٍ ولا وقتٍ ولا جهة.
           </p>
           <input
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeholder="سبب القفل (يظهر للفرع)"
+            placeholder="سبب القفل (للإدارة وحدها)"
             className="w-full rounded-lg bg-neutral-950 border border-neutral-800 px-3 py-2 text-sm outline-none focus:border-amber-600"
           />
         </>

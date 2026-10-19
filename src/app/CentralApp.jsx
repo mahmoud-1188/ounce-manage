@@ -11,6 +11,9 @@ import HqDocsPage from "../pages/HqDocsPage.jsx";
 import ControlPage from "../pages/ControlPage.jsx";
 import ConsolidatedPage from "../pages/ConsolidatedPage.jsx";
 import ZakatPage from "../pages/ZakatPage.jsx";
+import NetWeightPage from "../pages/NetWeightPage.jsx";
+import ClientErrorsPage from "../pages/ClientErrorsPage.jsx";
+import ApiKeysPage from "../pages/ApiKeysPage.jsx";
 import ExpensesPage from "../pages/ExpensesPage.jsx";
 import ApprovalsPage from "../pages/ApprovalsPage.jsx";
 import PolicyPage from "../pages/PolicyPage.jsx";
@@ -139,6 +142,12 @@ export default function CentralApp() {
           <ConsolidatedPage />
         ) : tab === "zakat" ? (
           <ZakatPage />
+        ) : tab === "netWeight" ? (
+          <NetWeightPage />
+        ) : tab === "clientErrors" ? (
+          <ClientErrorsPage />
+        ) : tab === "apiKeys" ? (
+          <ApiKeysPage />
         ) : tab === "expenses" ? (
           <ExpensesPage canManage={storeUser?.role === "owner" || !!storeUser?.canManageBranches} />
         ) : tab === "approvals" ? (

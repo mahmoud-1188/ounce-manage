@@ -31,6 +31,14 @@ export default function ApprovalsPage({ canManage }) {
     storeApi.fetchStoreApprovals(all).then((d) => setItems(d.approvals || [])).catch(() => setError("تعذّر تحميل الطلبات"));
   }, [all]);
   useEffect(loadItems, [loadItems]);
+  // المسار السريع: الطلبات الجديدة تظهر خلال ثوانٍ بلا تحديثٍ يدوي (والشاشة ظاهرة)
+  useEffect(() => {
+    const t = setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      storeApi.fetchStoreApprovals(all).then((d) => setItems(d.approvals || [])).catch(() => {});
+    }, 8000);
+    return () => clearInterval(t);
+  }, [all]);
 
   const flash = (t) => { setMsg(t); setTimeout(() => setMsg(""), 3500); };
   const dirty = rules && savedRules && rules.some((r, i) => r.approver !== savedRules[i].approver || Number(r.hqAbove || 0) !== Number(savedRules[i].hqAbove || 0));
