@@ -217,6 +217,9 @@ const storeApi = {
   setCodingModel: (branchId, model) => apiFetch(`/store/branches/${branchId}/coding-model`, { method: "POST", body: { model } }),
   codeRemnant: (branchId, itemId, pieces) => apiFetch(`/store/branches/${branchId}/remnants/${itemId}/code`, { method: "POST", body: { pieces } }),
   /** GET /store/zakat?price24= — زكاة الفروع الموحّدة: كل فرعٍ بدالّته ثم المجموع */
+  /** أعطال الفروع (migration 082) */
+  fetchClientErrors: (all = false) => apiFetch(`/store/client-errors${all ? "?all=1" : ""}`),
+  resolveClientError: (id, note = "") => apiFetch(`/store/client-errors/${id}/resolve`, { method: "POST", body: { note } }),
   /** GET /store/net-weight — صافي كل فرعٍ بالوزن بعد الالتزامات ثم المجموع */
   fetchNetWeight: (price24, karat = 21) => apiFetch(`/store/net-weight?price24=${Number(price24) || 0}&karat=${karat}`),
   fetchZakat: (price24) => apiFetch(`/store/zakat?price24=${Number(price24) || 0}`),
