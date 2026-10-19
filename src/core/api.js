@@ -296,6 +296,8 @@ const storeApi = {
 
   /** POST /store/hq-transactions/cash { toBranchId, fromBranchId?, amount, note } — نقدٌ من خزنة المصدر إلى خزنة فرع */
   sendHqCash: (payload) => apiFetch("/store/hq-transactions/cash", { method: "POST", body: payload }),
+  /** POST /store/hq-transactions/capital-draw { branchId, amount, note } — سحبٌ من رأس مال الفرع ينتظر موافقة مديره */
+  requestCapitalDraw: (payload) => apiFetch("/store/hq-transactions/capital-draw", { method: "POST", body: payload }),
 
   /** POST /store/hq-transactions/:id/receive — تستلم الإدارة (goods_to_hq/taskir_to_hq/cash_transfer). */
   receiveHqTransaction: (id) => apiFetch(`/store/hq-transactions/${id}/receive`, { method: "POST" }),
