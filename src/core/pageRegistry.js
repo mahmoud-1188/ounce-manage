@@ -52,6 +52,7 @@ const PAGE_REGISTRY = [
   { id: "consolidated", label: "الموحّد", icon: Scale },
   // المرجع 5.2.0 (قرار المالك 2026-09-29): زكاة الفروع — كل فرعٍ على سطره ثم إجمالي المجموعة
   { id: "zakat", label: "زكاة الفروع", icon: Landmark },
+  { id: "netWeight", label: "صافي الفروع بالوزن", icon: Scale },
   { id: "expenses", label: "المصروفات", icon: Receipt },
   { id: "approvals", label: "الاعتمادات", icon: ShieldCheck },
   // الشاشات والعمليات: ما تمنعه الإدارة أو تمنحه لكل دور في الفروع
@@ -66,7 +67,7 @@ const USERS_PAGE = { id: "users", label: "الموظفون", icon: Users };
 
 /** الصفحات الفعلية المسموحة لمستخدمٍ مركزي: owner كل شيء دائمًا، staff حسب allowedPages (null = بلا قيد أيضًا). */
 // باقة «بدون محاسبة» (migration 070 في الخادم): شاشات الإدارة المحاسبية تُخفى (والخادم يرفض مساراتها)
-const ACCOUNTING_PAGES = ["consolidated", "fiscal", "zakat"];
+const ACCOUNTING_PAGES = ["consolidated", "fiscal", "zakat", "netWeight"];
 const noAccounting = (storeUser) => storeUser?.storePackage === "no_accounting";
 
 function effectivePages(storeUser) {
@@ -87,7 +88,7 @@ const HQ_HUBS = [
   { key: "inbox", label: "الوارد", icon: Inbox, pages: ["approvals", "hqDocs"] },
   { key: "control", label: "التحكّم والإرسال", icon: SlidersHorizontal, pages: ["control", "policy"] },
   { key: "money", label: "المال", icon: Receipt, pages: ["expenses", "consolidated", "fiscal"] },
-  { key: "reports", label: "التقارير", icon: BarChart3, pages: ["report", "analytics", "zakat"] },
+  { key: "reports", label: "التقارير", icon: BarChart3, pages: ["report", "analytics", "zakat", "netWeight"] },
   { key: "admin", label: "الإدارة", icon: FolderCog, pages: ["org", "opsLog", "users"] },
 ];
 
