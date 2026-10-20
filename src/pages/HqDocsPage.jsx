@@ -122,7 +122,9 @@ export default function HqDocsPage({ storeUser }) {
                   <div className="text-xs text-neutral-500 truncate">{t.fromBranchName ? `من ${t.fromBranchName} ← إلى ${t.branchName}` : t.branchName}</div>
                 </div>
                 <span className={`text-xs font-medium shrink-0 ${STATUS_STYLE[t.status]?.cls || "text-neutral-400"}`}>
-                  {t.dir === "hq" && t.status === "pending" ? "بانتظار استلام الفرع" : STATUS_STYLE[t.status]?.label || t.status}
+                  {t.flow === "capital_draw"
+                    ? (t.status === "pending" ? "بانتظار موافقة مدير الفرع" : t.status === "received" ? "وافق المدير — دخل خزنة الإدارة" : t.status === "rejected" ? "رفضه المدير" : t.status)
+                    : t.dir === "hq" && t.status === "pending" ? "بانتظار استلام الفرع" : STATUS_STYLE[t.status]?.label || t.status}
                 </span>
               </div>
               <div className="text-xs text-neutral-500 mt-1.5">
@@ -131,6 +133,8 @@ export default function HqDocsPage({ storeUser }) {
                 {t.amount ? `${t.weight ? " · " : ""}${fmt(t.amount)}` : ""}
               </div>
               {t.note && <div className="text-xs text-neutral-500 mt-1">{t.note}</div>}
+              {t.status === "rejected" && t.decisionNote && <div className="text-xs text-red-400 mt-1">سبب الرفض: {t.decisionNote}</div>}
+              {t.decidedAt && t.status !== "pending" && <div className="text-xs text-neutral-600 mt-0.5">القرار {new Date(t.decidedAt).toLocaleString("en-GB")}</div>}
 
               {canManage && t.status === "pending" && t.dir === "branch" && (
                 <div className="flex gap-2 mt-3">
