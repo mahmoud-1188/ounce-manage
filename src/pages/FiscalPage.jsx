@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { CalendarCheck, Lock } from "lucide-react";
 import { storeApi } from "../core/api.js";
 import { hqError } from "../ui/hqErrors.js";
+import GroupVatCard from "./GroupVatCard.jsx";
 
 const nf = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2, minimumFractionDigits: 2 });
 
@@ -30,6 +31,7 @@ export default function FiscalPage({ canManage }) {
       </div>
       <p className="text-xs text-neutral-400">إقفال الشهر يحفظ أرقامه كما هي يوم الإقفال (لكل حساب) باسم من أقفل — ويراه الفرع. لا يُقفل الشهر الجاري.</p>
       {error && <div className="text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-lg px-3 py-2">{error}</div>}
+      <GroupVatCard canManage={canManage} />
       {!data ? <div className="text-neutral-400 text-sm">جارِ التحميل…</div> : data.map((b) => {
         const openMonths = b.months.filter((m) => !m.closed);
         const last = b.closes[b.closes.length - 1];

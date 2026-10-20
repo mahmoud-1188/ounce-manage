@@ -319,6 +319,10 @@ const storeApi = {
 
   // ── السنة المالية · الجرد من الإدارة · سجلّ الإدارة · الهيكل (migration 061) ──
   fetchFiscal: () => apiFetch("/store/fiscal"),
+  // ── الإقرار الموحّد للمنشأة (migration 092) ──
+  fetchGroupVat: (from, to) => apiFetch(`/store/group-vat?from=${from}&to=${to}`),
+  setVatFiling: (filing) => apiFetch("/store/group-vat/filing", { method: "POST", body: { filing } }),
+  settleGroupVat: (body) => apiFetch("/store/group-vat/settle", { method: "POST", body }),
   closeBranchMonth: (branchId, period) => apiFetch(`/store/branches/${branchId}/close-month`, { method: "POST", body: { period } }),
   fetchStocktakeSheet: (branchId) => apiFetch(`/store/branches/${branchId}/stocktake-sheet`),
   sendRemoteStocktake: (branchId, counts, note) => apiFetch(`/store/branches/${branchId}/remote-stocktake`, { method: "POST", body: { counts, note } }),
