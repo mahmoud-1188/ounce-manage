@@ -88,7 +88,7 @@ export default function ApprovalsPage({ canManage }) {
                 <div className="flex items-center gap-2 text-sm flex-wrap">
                   <span className="flex-1 min-w-[8rem]">{r.label}{r.threshold > 0 && <span className="text-xs text-neutral-500"> · فوق {fmt(r.threshold)}</span>}</span>
                   <div className="flex gap-1 bg-neutral-800/60 rounded-lg p-1">
-                    {[["branch", "مدير الفرع"], ["hq_above", "الإدارة فوق مبلغ"], ["hq", "الإدارة"]].map(([v, l]) => (
+                    {[["branch", "مدير الفرع"], ["hq_above", "الإدارة فوق مبلغ"], ["hq", "الإدارة"], ...(r.allowNone ? [["none", "بلا موافقة"]] : [])].map(([v, l]) => (
                       <button key={v} type="button" disabled={!canManage}
                         onClick={() => setRules(rules.map((x, j) => (j === i ? { ...x, approver: v } : x)))}
                         className={`px-2.5 py-1 rounded-md text-xs disabled:opacity-60 ${r.approver === v ? "bg-neutral-100 text-neutral-900" : "text-neutral-300"}`}>{l}</button>
