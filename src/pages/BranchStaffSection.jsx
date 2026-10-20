@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { KeyRound, Plus, QrCode, RotateCcw, ShieldCheck, Sparkles, Trash2, Users, X } from "lucide-react";
+import { KeyRound, Plus, QrCode, ShieldCheck, Sparkles, Trash2, Users, X } from "lucide-react";
 import EnrollCodeModal from "../ui/EnrollCodeModal.jsx";
 import { storeApi, ApiError } from "../core/api.js";
 
@@ -81,27 +81,29 @@ export default function BranchStaffSection({ branchId, canManage }) {
     setError("");
     try {
       await storeApi.removeBranchUser(branchId, u.id);
-      // التعطيل لا حذف: يبقى في القائمة معطَّلًا فيُعاد تفعيله متى شئت
-      setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, active: false } : x)));
+      // الحذف يُخرجه من القائمة نهائيًّا (التعطيل بالمفتاح يُبقيه)
+      setUsers((prev) => prev.filter((x) => x.id !== u.id));
     } catch (err) {
       setError(
         err instanceof ApiError && err.body?.error === "would_remove_last_manager"
           ? "لا يمكن إزالة آخر مدير في الفرع"
-          : "تعذّر إزالة الموظف"
+          : "تعذّر حذف الموظف"
       );
     } finally {
       setBusyId(null);
     }
   };
 
-  const reactivate = async (u) => {
+  // مفتاح التعطيل/التفعيل: المعطَّل لا يدخل ويبقى في القائمة، ويُعاد بالمفتاح نفسه
+  const setActive = async (u, active) => {
     setBusyId(u.id);
     setError("");
     try {
-      await storeApi.setBranchUserActive(branchId, u.id, true);
-      load();
-    } catch {
-      setError("تعذّر إعادة التفعيل");
+      await storeApi.setBranchUserActive(branchId, u.id, active);
+      setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, active } : x)));
+    } catch (err) {
+      setError(err instanceof ApiError && err.body?.error === "would_remove_last_manager"
+        ? "لا يمكن تعطيل آخر مدير في الفرع" : active ? "تعذّر التفعيل" : "تعذّر التعطيل");
     } finally {
       setBusyId(null);
     }
@@ -223,7 +225,6 @@ export default function BranchStaffSection({ branchId, canManage }) {
                           {u.ref}
                         </span>
                       )}
-                      {!u.active && <span className="text-xs text-neutral-500">معطَّل</span>}
                     </div>
                   </div>
 
@@ -264,62 +265,67 @@ export default function BranchStaffSection({ branchId, canManage }) {
                     </div>
                   )}
 
-                  {!u.active ? (
-                    <div className="flex items-center gap-2 mt-2.5">
-                      <button type="button" disabled={busyId === u.id} onClick={() => reactivate(u)}
-                        className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full bg-neutral-800 text-emerald-400 border border-emerald-500/30 disabled:opacity-60">
-                        <RotateCcw size={11} /> إعادة التفعيل
-                      </button>
-                    </div>
-                  ) : (
-                  <div className="flex items-center gap-2 mt-2.5 flex-wrap">
-                    <button
-                      type="button"
-                      onClick={() => { setPinFor(pinFor === u.id ? null : u.id); setPinIn(""); setError(""); }}
-                      className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full bg-neutral-800 text-neutral-300 border border-neutral-700"
-                    >
-                      <KeyRound size={11} /> رقم سري جديد
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setEnrollFor(u)}
-                      className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full bg-neutral-800 text-amber-300 border border-amber-500/30"
-                    >
-                      <QrCode size={11} /> رمز ربط جهاز
-                    </button>
-                    <button
-                      type="button"
-                      disabled={busyId === u.id}
-                      onClick={() => resetToRole(u)}
-                      className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full bg-neutral-800 text-amber-400 border border-amber-500/30 disabled:opacity-60"
-                    >
-                      <ShieldCheck size={11} /> إرجاع افتراضي الدور
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setRenaming(u.id); setNewName(u.name); }}
-                      className="text-[11px] px-2.5 py-1 rounded-full bg-neutral-800 text-neutral-300 border border-neutral-700"
-                    >
-                      تغيير الاسم
-                    </button>
-                    {(() => {
-                      // آخر مديرٍ نشط لا يُحذف — يبقى للفرع من يديره؛ أضف مديرًا آخر أوّلًا
-                      const lastManager = u.role === "manager" && (users || []).filter((x) => x.role === "manager" && x.active !== false).length <= 1;
-                      return (
+                  {(() => {
+                    // آخر مديرٍ نشط لا يُعطَّل ولا يُحذف — يبقى للفرع من يديره؛ أضف مديرًا آخر أوّلًا
+                    const lastManager = u.role === "manager" && u.active && (users || []).filter((x) => x.role === "manager" && x.active).length <= 1;
+                    return (
+                      <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+                        <button type="button" role="switch" aria-checked={!!u.active} data-active-toggle={u.id}
+                          disabled={busyId === u.id || lastManager}
+                          onClick={() => setActive(u, !u.active)}
+                          title={lastManager ? "آخر مدير في الفرع — لا يُعطَّل" : u.active ? "اضغط لتعطيله — لا يدخل ويبقى في القائمة" : "اضغط لتفعيله"}
+                          className="flex items-center gap-2 text-[11px] px-2 py-1 rounded-full bg-neutral-800 border border-neutral-700 disabled:opacity-50">
+                          <span className="relative inline-block w-8 h-4 rounded-full transition-colors" style={{ background: u.active ? "rgb(16,185,129)" : "rgb(64,64,64)" }}>
+                            <span className="absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all" style={{ right: u.active ? 2 : 18 }} />
+                          </span>
+                          <span className={u.active ? "text-emerald-400" : "text-neutral-400"}>{u.active ? "نشط" : "معطَّل"}</span>
+                        </button>
+                        {u.active && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => { setPinFor(pinFor === u.id ? null : u.id); setPinIn(""); setError(""); }}
+                              className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full bg-neutral-800 text-neutral-300 border border-neutral-700"
+                            >
+                              <KeyRound size={11} /> رقم سري جديد
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEnrollFor(u)}
+                              className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full bg-neutral-800 text-amber-300 border border-amber-500/30"
+                            >
+                              <QrCode size={11} /> رمز ربط جهاز
+                            </button>
+                            <button
+                              type="button"
+                              disabled={busyId === u.id}
+                              onClick={() => resetToRole(u)}
+                              className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full bg-neutral-800 text-amber-400 border border-amber-500/30 disabled:opacity-60"
+                            >
+                              <ShieldCheck size={11} /> إرجاع افتراضي الدور
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { setRenaming(u.id); setNewName(u.name); }}
+                              className="text-[11px] px-2.5 py-1 rounded-full bg-neutral-800 text-neutral-300 border border-neutral-700"
+                            >
+                              تغيير الاسم
+                            </button>
+                          </>
+                        )}
                         <button
                           type="button"
                           data-remove-branch-user={u.id}
                           disabled={busyId === u.id || lastManager}
-                          onClick={() => { if (window.confirm(`حذف ${u.name} من الفرع؟ لن يستطيع الدخول، ويبقى اسمه على عملياته — وتستطيع إعادته لاحقًا.`)) remove(u); }}
+                          onClick={() => { if (window.confirm(`حذف ${u.name} من الفرع نهائيًّا؟ يخرج من القائمة ولا يدخل ولا يُعاد تفعيله — واسمه يبقى على عملياته في السجلّ. للإيقاف المؤقت استعمل مفتاح «نشط».`)) remove(u); }}
                           className="mr-auto flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full border border-red-900 bg-red-950/40 text-red-300 disabled:opacity-50"
-                          title={lastManager ? "آخر مدير في الفرع — أضف مديرًا آخر أوّلًا" : "حذف الموظف"}
+                          title={lastManager ? "آخر مدير في الفرع — أضف مديرًا آخر أوّلًا" : "حذف الموظف نهائيًّا"}
                         >
-                          <Trash2 size={12} /> {lastManager ? "آخر مدير — لا يُحذف" : "حذف الموظف"}
+                          <Trash2 size={12} /> {lastManager ? "آخر مدير — لا يُحذف" : "حذف"}
                         </button>
-                      );
-                    })()}
-                  </div>
-                  )}
+                      </div>
+                    );
+                  })()}
                 </>
               )}
             </div>
