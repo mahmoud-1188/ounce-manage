@@ -302,15 +302,22 @@ export default function BranchStaffSection({ branchId, canManage }) {
                     >
                       تغيير الاسم
                     </button>
-                    <button
-                      type="button"
-                      disabled={busyId === u.id}
-                      onClick={() => remove(u)}
-                      className="mr-auto text-red-400 disabled:opacity-60"
-                      title="تعطيل"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    {(() => {
+                      // آخر مديرٍ نشط لا يُحذف — يبقى للفرع من يديره؛ أضف مديرًا آخر أوّلًا
+                      const lastManager = u.role === "manager" && (users || []).filter((x) => x.role === "manager" && x.active !== false).length <= 1;
+                      return (
+                        <button
+                          type="button"
+                          data-remove-branch-user={u.id}
+                          disabled={busyId === u.id || lastManager}
+                          onClick={() => { if (window.confirm(`حذف ${u.name} من الفرع؟ لن يستطيع الدخول، ويبقى اسمه على عملياته — وتستطيع إعادته لاحقًا.`)) remove(u); }}
+                          className="mr-auto flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full border border-red-900 bg-red-950/40 text-red-300 disabled:opacity-50"
+                          title={lastManager ? "آخر مدير في الفرع — أضف مديرًا آخر أوّلًا" : "حذف الموظف"}
+                        >
+                          <Trash2 size={12} /> {lastManager ? "آخر مدير — لا يُحذف" : "حذف الموظف"}
+                        </button>
+                      );
+                    })()}
                   </div>
                   )}
                 </>
