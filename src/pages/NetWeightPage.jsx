@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Scale } from "lucide-react";
 import { storeApi } from "../core/api.js";
+import WastageCard from "./WastageCard.jsx";
 
 const wf = new Intl.NumberFormat("en-US", { minimumFractionDigits: 3, maximumFractionDigits: 3 });
 const PRICE_KEY = "ounce_hq_zakat_price24";
@@ -90,6 +91,7 @@ export default function NetWeightPage() {
         </div>
       )}
       <p className="text-[11px] text-neutral-500">جرامات بعيار {karat}. الذهب المملوك: القطع غير المباعة والكسر وذهب الخزنة بعد ما علينا ذهبًا للموردين. النقد: كاش وشبكة وبنوك. الالتزامات: الموردون والرواتب والضريبة الصافية.</p>
+      <WastageCard />
     </div>
   );
 }
