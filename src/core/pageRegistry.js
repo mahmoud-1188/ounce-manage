@@ -1,4 +1,4 @@
-import { Bug, KeyRound, Inbox, FolderCog, LayoutDashboard, Building2, BarChart3, LineChart, Users, Send, SlidersHorizontal, Scale, Receipt, ShieldCheck, LockKeyhole, CalendarCheck, Network, History, Landmark } from "lucide-react";
+import { Bug, Tag, KeyRound, Inbox, FolderCog, LayoutDashboard, Building2, BarChart3, LineChart, Users, Send, SlidersHorizontal, Scale, Receipt, ShieldCheck, LockKeyhole, CalendarCheck, Network, History, Landmark } from "lucide-react";
 
 /**
  * سجلّ شاشات التطبيق المركزي — نظير NAV_REGISTRY في ounce-frontend.
@@ -66,6 +66,9 @@ const PAGE_REGISTRY = [
 ];
 
 const USERS_PAGE = { id: "users", label: "الموظفون", icon: Users };
+// شاشة التكويد تُفتح بصلاحية «إرسال تكويد لفرع» وحدها — لا بقائمة الشاشات — فالمكوِّد لا يرى غيرها
+const CODING_PAGE = { id: "coding", label: "التكويد", icon: Tag };
+const canCode = (u) => u?.role === "owner" || !!u?.canSendCoding;
 
 /** الصفحات الفعلية المسموحة لمستخدمٍ مركزي: owner كل شيء دائمًا، staff حسب allowedPages (null = بلا قيد أيضًا). */
 // باقة «بدون محاسبة» (migration 070 في الخادم): شاشات الإدارة المحاسبية تُخفى (والخادم يرفض مساراتها)
@@ -77,6 +80,7 @@ function effectivePages(storeUser) {
   const pages = storeUser.role === "owner" || storeUser.allowedPages == null
     ? PAGE_REGISTRY.map((p) => p.id)
     : PAGE_REGISTRY.filter((p) => storeUser.allowedPages.includes(p.id)).map((p) => p.id);
+  if (canCode(storeUser)) pages.push("coding");
   return noAccounting(storeUser) ? pages.filter((id) => !ACCOUNTING_PAGES.includes(id)) : pages;
 }
 
@@ -87,7 +91,7 @@ function effectivePages(storeUser) {
  */
 const HQ_HUBS = [
   { key: "branches", label: "الفروع", icon: Building2, pages: ["home", "branches"] },
-  { key: "inbox", label: "الوارد", icon: Inbox, pages: ["approvals", "hqDocs"] },
+  { key: "inbox", label: "الوارد", icon: Inbox, pages: ["approvals", "hqDocs", "coding"] },
   { key: "control", label: "التحكّم والإرسال", icon: SlidersHorizontal, pages: ["control", "policy"] },
   { key: "money", label: "المال", icon: Receipt, pages: ["expenses", "consolidated", "fiscal"] },
   { key: "reports", label: "التقارير", icon: BarChart3, pages: ["report", "analytics", "zakat", "netWeight"] },
@@ -98,7 +102,7 @@ const HQ_HUBS = [
 function visibleHubs(storeUser) {
   const allowed = new Set(effectivePages(storeUser));
   if (storeUser?.role === "owner") allowed.add("users");
-  const byId = new Map([...PAGE_REGISTRY, USERS_PAGE].map((p) => [p.id, p]));
+  const byId = new Map([...PAGE_REGISTRY, USERS_PAGE, CODING_PAGE].map((p) => [p.id, p]));
   return HQ_HUBS
     .map((h) => ({ ...h, pages: h.pages.filter((id) => allowed.has(id)).map((id) => byId.get(id)) }))
     .filter((h) => h.pages.length);
@@ -106,4 +110,4 @@ function visibleHubs(storeUser) {
 
 const hubOfPage = (id) => HQ_HUBS.find((h) => h.pages.includes(id)) || null;
 
-export { HQ_HUBS, PAGE_REGISTRY, USERS_PAGE, effectivePages, hubOfPage, visibleHubs, noAccounting };
+export { CODING_PAGE, HQ_HUBS, PAGE_REGISTRY, USERS_PAGE, effectivePages, hubOfPage, visibleHubs, noAccounting };

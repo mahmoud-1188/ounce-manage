@@ -36,6 +36,7 @@ export default function UsersPage() {
           setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
           setPermUser(null);
         }}
+        onDeleted={() => { setUsers((prev) => prev.filter((u) => u.id !== permUser.id)); setPermUser(null); }}
       />
     );
   }
@@ -122,7 +123,7 @@ export default function UsersPage() {
   );
 }
 
-function PermissionsPanel({ user, onBack, onSaved }) {
+function PermissionsPanel({ user, onBack, onSaved, onDeleted = null }) {
   const [allowed, setAllowed] = useState(user.allowedPages == null ? PAGE_REGISTRY.map((p) => p.id) : user.allowedPages);
   const [unrestricted, setUnrestricted] = useState(user.allowedPages == null);
   const [canManageBranches, setCanManageBranches] = useState(!!user.canManageBranches);
@@ -201,7 +202,7 @@ function PermissionsPanel({ user, onBack, onSaved }) {
           راجع 026_store_user_coding_permission.sql. */}
       <label className="flex items-center gap-2 rounded-xl border border-neutral-800 bg-neutral-900 p-3.5 cursor-pointer">
         <input type="checkbox" checked={canSendCoding} onChange={(e) => setCanSendCoding(e.target.checked)} className="accent-amber-500" />
-        <span className="text-sm">يملك صلاحية إرسال تكويد لفرع</span>
+        <span className="text-sm">يملك صلاحية التكويد<span className="block text-[11px] text-neutral-500">تفتح له شاشة «التكويد» وحدها — لا يرى الفروع ولا أرقامها ما لم تفتح له شاشاتها أعلاه</span></span>
       </label>
 
       <label className="flex items-center gap-2 rounded-xl border border-neutral-800 bg-neutral-900 p-3.5 cursor-pointer">
@@ -216,6 +217,22 @@ function PermissionsPanel({ user, onBack, onSaved }) {
         className="w-full rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-60 text-neutral-950 font-medium py-2.5 text-sm transition-colors"
       >
         {busy ? "جارِ الحفظ…" : "حفظ الصلاحيات"}
+      </button>
+
+      <button
+        type="button"
+        data-delete-store-user
+        disabled={busy}
+        onClick={async () => {
+          if (!window.confirm(`حذف ${user.name} نهائيًّا؟ لن يستطيع الدخول، ويبقى اسمه على ما فعله في السجلّ.`)) return;
+          setBusy(true); setError("");
+          try { await storeApi.deleteUser(user.id); onDeleted?.(); }
+          catch { setError("تعذّر حذف الموظف"); }
+          finally { setBusy(false); }
+        }}
+        className="w-full rounded-lg border border-red-900 bg-red-950/40 text-red-300 py-2.5 text-sm"
+      >
+        حذف الموظف
       </button>
     </div>
   );

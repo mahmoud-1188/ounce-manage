@@ -8,6 +8,7 @@ import ReportPage from "../pages/ReportPage.jsx";
 import AnalyticsPage from "../pages/AnalyticsPage.jsx";
 import UsersPage from "../pages/UsersPage.jsx";
 import HqDocsPage from "../pages/HqDocsPage.jsx";
+import CodingQueueCard from "../pages/CodingQueueCard.jsx";
 import ControlPage from "../pages/ControlPage.jsx";
 import ConsolidatedPage from "../pages/ConsolidatedPage.jsx";
 import ZakatPage from "../pages/ZakatPage.jsx";
@@ -112,9 +113,17 @@ export default function CentralApp() {
   const allowed = effectivePages(storeUser);
   const go = (next) => { setOpenBranch(null); setMenuOpen(false); setTab(next); };
 
-  const pageBody = (
+  // الشاشة غير المسموحة لا تُرسم أصلًا (الخادم يرفض بياناتها أيضًا) — تُعرض أوّل شاشةٍ مسموحة
+  const tabAllowed = tab === "users" ? storeUser?.role === "owner" : allowed.includes(tab) || (tab === "dashboard" && allowed.includes("home"));
+  const homeTab = allowed.includes("home") ? "home" : allowed[0] || "home";
+  const pageBody = !openBranch && !tabAllowed ? (
+    <div className="text-sm text-neutral-400 py-10 text-center" data-page-denied>
+      {allowed.length ? "هذه الشاشة ليست ضمن صلاحياتك." : "لا شاشات مفتوحة لحسابك — اطلبها من المالك."}
+      {allowed.length > 0 && <div className="mt-3"><button type="button" onClick={() => go(homeTab)} className="text-amber-400 underline">افتح شاشاتك</button></div>}
+    </div>
+  ) : (
     <>
-        {openBranch ? (
+        {openBranch && allowed.includes("branches") ? (
           <BranchDetailPage
             branchId={openBranch.id}
             branchName={openBranch.name}
@@ -134,8 +143,13 @@ export default function CentralApp() {
           <AnalyticsPage />
         ) : tab === "users" ? (
           <UsersPage />
-        ) : tab === "hqDocs" ? (
+        ) : tab === "hqDocs" && allowed.includes("hqDocs") ? (
           <HqDocsPage storeUser={storeUser} />
+        ) : tab === "coding" && allowed.includes("coding") ? (
+          <div className="space-y-3" data-coding-page>
+            <h2 className="text-lg font-semibold">التكويد</h2>
+            <CodingQueueCard canCode={storeUser?.role === "owner" || !!storeUser?.canSendCoding} canManage={canManage} />
+          </div>
         ) : tab === "control" ? (
           <ControlPage canManage={storeUser?.role === "owner" || !!storeUser?.canManageBranches} />
         ) : tab === "consolidated" ? (
@@ -168,7 +182,7 @@ export default function CentralApp() {
 
   // ── البسيط: صفحةٌ واحدة بلا تبويبات — ☰ يحمل كل شاشة والشكل، وكل شاشةٍ ترجع للرئيسية ──
   if (design === "simple") {
-    const atHome = !openBranch && tab === "home";
+    const atHome = !openBranch && tab === "home" && allowed.includes("home");
     return (
       <div className="min-h-screen text-neutral-100" style={{ background: "#1B1A17", color: "#F1ECE2" }}>
         <header className="sticky top-0 z-40" style={{ background: "rgba(27,26,23,.92)", backdropFilter: "blur(12px)", borderBottom: "1px solid #332F28" }}>
@@ -180,8 +194,8 @@ export default function CentralApp() {
               <div className="font-semibold text-sm truncate">أونصة — الإدارة المركزية</div>
               {storeUser?.name && <div className="text-xs truncate" style={{ color: "#8F887A" }}>{storeUser.name}</div>}
             </div>
-            {!atHome && (
-              <button type="button" onClick={() => go("home")} className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full"
+            {!atHome && tab !== homeTab && (
+              <button type="button" onClick={() => go(homeTab)} className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full"
                 style={{ background: "#2E2A20", color: "#E4C47D", border: "1px solid #4D4230" }}><ChevronRight size={14} /> الرئيسية</button>
             )}
             <button type="button" onClick={handleLogout} aria-label="خروج" className="text-neutral-400 hover:text-neutral-100"><LogOut size={18} /></button>

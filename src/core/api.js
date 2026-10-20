@@ -164,6 +164,8 @@ const storeApi = {
    */
   createUser: (payload) => apiFetch("/store/users", { method: "POST", body: payload }),
 
+  /** DELETE /store/users/:id — حذف موظفٍ مركزي (حذفٌ منطقي، owner فقط) */
+  deleteUser: (id) => apiFetch(`/store/users/${id}`, { method: "DELETE" }),
   /** PATCH /store/users/:id { allowedPages?, canManageBranches?, active? } */
   updateUser: (id, payload) => apiFetch(`/store/users/${id}`, { method: "PATCH", body: payload }),
 
