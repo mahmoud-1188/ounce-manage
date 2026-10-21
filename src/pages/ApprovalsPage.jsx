@@ -21,9 +21,16 @@ export default function ApprovalsPage({ canManage }) {
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
   const [notes, setNotes] = useState({});
+  // حدّ الاعتماد الذاتي ومهلة الطلب (سياسة الإدارة لكل الفروع)
+  const [limits, setLimits] = useState(null);
+  const [savedLimits, setSavedLimits] = useState(null);
 
   useEffect(() => {
-    storeApi.fetchApprovalRouting().then((d) => { setRules(d.rules); setSavedRules(d.rules); }).catch(() => setError("تعذّر تحميل سياسة الاعتماد"));
+    storeApi.fetchApprovalRouting().then((d) => {
+      setRules(d.rules); setSavedRules(d.rules);
+      const l = { selfMax: d.selfMax ? String(d.selfMax) : "", expiryHours: String(d.expiryHours || 72) };
+      setLimits(l); setSavedLimits(l);
+    }).catch(() => setError("تعذّر تحميل سياسة الاعتماد"));
   }, []);
 
   const loadItems = useCallback(() => {
@@ -41,7 +48,8 @@ export default function ApprovalsPage({ canManage }) {
   }, [all]);
 
   const flash = (t) => { setMsg(t); setTimeout(() => setMsg(""), 3500); };
-  const dirty = rules && savedRules && rules.some((r, i) => r.approver !== savedRules[i].approver || Number(r.hqAbove || 0) !== Number(savedRules[i].hqAbove || 0));
+  const dirty = (rules && savedRules && rules.some((r, i) => r.approver !== savedRules[i].approver || Number(r.hqAbove || 0) !== Number(savedRules[i].hqAbove || 0)))
+    || (limits && savedLimits && (limits.selfMax !== savedLimits.selfMax || limits.expiryHours !== savedLimits.expiryHours));
 
   const saveRouting = async () => {
     setBusy(true); setError("");
@@ -50,8 +58,10 @@ export default function ApprovalsPage({ canManage }) {
       if (bad) { setError(`اكتب الحدّ الذي تعتمد الإدارة فوقه — ${bad.label}`); return; }
       const routing = Object.fromEntries(rules.map((r) => [r.id, r.approver]));
       routing.hqAbove = Object.fromEntries(rules.filter((r) => r.approver === "hq_above").map((r) => [r.id, Number(r.hqAbove)]));
-      await storeApi.saveApprovalRouting(routing);
-      setSavedRules(rules);
+      const eh = Number(limits.expiryHours);
+      if (!(eh >= 1 && eh <= 720)) { setError("مهلة الطلب بين ساعة و720 ساعة"); return; }
+      await storeApi.saveApprovalRouting(routing, { selfMax: Number(limits.selfMax) || 0, expiryHours: eh });
+      setSavedRules(rules); setSavedLimits(limits);
       flash("اعتُمدت السياسة — تسري على الطلبات الجديدة في كل الفروع");
     } catch (e) { setError(hqError(e, "تعذّر حفظ السياسة")); } finally { setBusy(false); }
   };
@@ -106,6 +116,20 @@ export default function ApprovalsPage({ canManage }) {
                 )}
               </div>
             ))}
+            {limits && (
+              <div className="grid sm:grid-cols-2 gap-2 pt-2 border-t border-neutral-800" data-approval-limits>
+                <label className="text-xs text-neutral-400">حدّ الاعتماد الذاتي — ما فوقه لا يعتمده صاحبه لنفسه (فارغ: بلا حدّ)
+                  <input type="text" inputMode="decimal" disabled={!canManage} value={limits.selfMax} data-self-max
+                    onChange={(e) => setLimits({ ...limits, selfMax: e.target.value.replace(/[^\d.]/g, "") })}
+                    className="block w-full mt-1 rounded-md bg-neutral-950 border border-neutral-700 px-2 py-1 text-neutral-100" placeholder="بلا حدّ" />
+                </label>
+                <label className="text-xs text-neutral-400">مهلة الطلب (ساعة) — بعدها ينتهي ويُطلب من جديد
+                  <input type="text" inputMode="numeric" disabled={!canManage} value={limits.expiryHours} data-expiry-hours
+                    onChange={(e) => setLimits({ ...limits, expiryHours: e.target.value.replace(/\D/g, "") })}
+                    className="block w-full mt-1 rounded-md bg-neutral-950 border border-neutral-700 px-2 py-1 text-neutral-100" />
+                </label>
+              </div>
+            )}
             {canManage && (
               <button type="button" onClick={saveRouting} disabled={busy || !dirty}
                 className="w-full rounded-lg py-2 text-sm font-medium bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-neutral-950">اعتمد السياسة</button>

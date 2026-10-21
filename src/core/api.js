@@ -243,7 +243,7 @@ const storeApi = {
     apiFetch(`/store/branches/${branchId}/target`, { method: "PATCH", body: { target30 } }),
   /** من يعتمد ماذا: expense/refund/supplier_settle → hq | branch */
   fetchApprovalRouting: () => apiFetch("/store/approval-routing"),
-  saveApprovalRouting: (routing) => apiFetch("/store/approval-routing", { method: "PUT", body: { routing } }),
+  saveApprovalRouting: (routing, limits = {}) => apiFetch("/store/approval-routing", { method: "PUT", body: { routing, ...limits } }),
   /** صندوق الاعتمادات — status=all للسجلّ كاملًا */
   fetchStoreApprovals: (all = false) => apiFetch(`/store/approvals${all ? "?status=all" : ""}`),
   decideStoreApproval: (id, decision, note) =>
