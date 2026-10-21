@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BarChart3, Building2, Check, ChevronLeft, Send, Wallet, Warehouse, X } from "lucide-react";
+import { BarChart3, Building2, Check, ChevronLeft, RadioTower, Send, Wallet, Warehouse, X } from "lucide-react";
 import { storeApi } from "../core/api.js";
 import { hqNowTasks, hqSell24 } from "../core/design.js";
 
@@ -11,7 +11,7 @@ const C = {
   accent: "#D9B566", accentText: "#E4C47D", accentBg: "#2E2A20", accentLine: "#4D4230", bad: "#E38B76", badBg: "#2E1F1B", badLine: "#4D302A",
   grad: "linear-gradient(135deg, #E6C77E, #BF9848)", shadow: "0 1px 0 rgba(255,255,255,.03) inset, 0 12px 28px -16px rgba(0,0,0,.7)",
 };
-const TONE = { central: ["#E5A276", "#36271D"], accounting: ["#A5A9E0", "#252739"], inventory: ["#8FB3E0", "#1F2A38"], money: ["#8ACB9F", "#1E2F24"], reports: ["#86C6D6", "#1C2E33"] };
+const TONE = { central: ["#E5A276", "#36271D"], accounting: ["#A5A9E0", "#252739"], inventory: ["#8FB3E0", "#1F2A38"], money: ["#8ACB9F", "#1E2F24"], reports: ["#86C6D6", "#1C2E33"], links: ["#7FC9B5", "#1C302B"] };
 const PURITY = { 24: 1, 22: 0.916, 21: 0.875, 18: 0.75 };
 const nf = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2, minimumFractionDigits: 2 });
 const wf = new Intl.NumberFormat("en-US", { maximumFractionDigits: 3, minimumFractionDigits: 3 });
@@ -26,8 +26,11 @@ const LAYOUT = {
       items: [["hqDocs", "معاملات الإدارة والشحن للفروع"]] },
   ],
   small: [
+    // التحكّم والإرسال (المرجع): ما ترسله الإدارة للفروع — السعر والأهداف · الإعلانات · الإقفال
+    { key: "control", title: "التحكّم والإرسال", icon: RadioTower, tone: "links",
+      items: [["control", "السعر والأهداف والإعلانات"], ["fiscal", "الإقفال — الشهر وقفل الفترات"]] },
     { key: "money", title: "المال", icon: Wallet, tone: "money",
-      items: [["expenses", "المصروفات وعمولة البنك"], ["fiscal", "السنة المالية وإقفال الأشهر"], ["control", "الأسعار والإعلانات"], ["consolidated", "الميزان الموحّد"]] },
+      items: [["expenses", "المصروفات وعمولة البنك"], ["fiscal", "السنة المالية وإقفال الأشهر"], ["consolidated", "الميزان الموحّد"]] },
     { key: "reports", title: "التقارير", icon: BarChart3, tone: "reports",
       items: [["report", "التقرير المجمّع"], ["analytics", "التحليلات"], ["consolidated", "الموحّد"], ["zakat", "زكاة الفروع"], ["netWeight", "صافي الفروع بالوزن"], ["opsLog", "سجلّ عمليات الإدارة"], ["clientErrors", "أعطال الفروع"], ["apiKeys", "الواجهة البرمجية"], ["dashboard", "لوحة الإدارة"]] },
   ],

@@ -8,10 +8,10 @@ const PRICE_KEY = "ounce_hq_zakat_price24";
 const readPrice = () => { try { return localStorage.getItem(PRICE_KEY) || ""; } catch { return ""; } };
 
 /**
- * زكاة الفروع (المرجع 5.2.0: HqZakatReport · قرار المالك 2026-09-29).
- * كل فرعٍ على سطره بالدالّة نفسها التي في الفرع — من سجلّاته على الخادم وبسعر اليوم هنا —
- * ثم إجمالي المجموعة. فرعٌ أطفأ الزكاة «متوقفة» خارج المجموع. المجموع جمع زكاة كل فرع،
- * لا زكاة وعاءٍ موحّد: فرعٌ التزاماته أكبر من أصوله لا يُنقص زكاة غيره.
+ * زكاة الفروع (المرجع HqZakatReport · قرار المالك 2026-10-21).
+ * كل فرعٍ على سطره بالدالّة نفسها التي في الفرع — من سجلّاته على الخادم وبسعر اليوم هنا.
+ * الزكاة على المنشأة كلّها: وعاء المجموعة = مجموع أوعية الدفاتر (فرعٌ عليه أكثر ممّا له يُنقصه)، ثم الزكاة
+ * من هذا الوعاء الواحد. أرقام كل فرعٍ للعرض وحده. فرعٌ أطفأ الزكاة «متوقفة» خارج المجموع.
  */
 export default function ZakatPage() {
   const [price, setPrice] = useState(readPrice);
@@ -56,7 +56,11 @@ export default function ZakatPage() {
               <span className="text-sm text-neutral-300">الوعاء {fmt(data.total.base)}</span>
               <span className="text-2xl font-bold text-amber-400">{fmt(data.total.due)}</span>
             </div>
-            <p className="text-[11px] text-neutral-500 mt-1">كل سطرٍ بسنة فرعه (هجرية 2.5٪ · ميلادية 2.5777٪) وبسعر {fmt(data.price24)} — تاريخ {data.date}</p>
+            <p className="text-[11px] text-neutral-500 mt-1" data-group-zakat>
+              الزكاة على المنشأة كلّها: وعاء المجموعة = مجموع أوعية الدفاتر (فرعٌ عليه أكثر ممّا له يُنقصه)، ثم الزكاة من هذا الوعاء الواحد
+              — بسنة {data.total.year === "hijri" ? "هجرية 2.5٪" : "ميلادية 2.5777٪"} وبسعر {fmt(data.price24)} · تاريخ {data.date}.
+              أرقام كل فرعٍ أدناه للعرض وحده{Math.abs((data.total.perBookDue || 0) - (data.total.due || 0)) >= 0.01 ? ` (مجموع زكاة الدفاتر منفردةً ${fmt(data.total.perBookDue)})` : ""}.
+            </p>
           </div>
           <div className="space-y-2">
             {data.lines.map((l) => (
