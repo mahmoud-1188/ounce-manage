@@ -72,6 +72,41 @@ export default function ConsolidatedPage() {
             </table>
           </div>
 
+          {data.pl && (
+            <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-3 space-y-1.5" data-consolidated-pl>
+              <div className="text-xs font-semibold text-amber-400">النتيجة بالريال — الفروع ثم الإدارة</div>
+              {data.pl.rows.filter((r) => !r.isHq).map((r) => (
+                <div key={r.id} className="flex items-center text-xs text-neutral-300">
+                  <span className="flex-1">{r.name}</span>
+                  <span className="text-neutral-500 w-40 text-end tabular-nums">إيراد {fmt(r.revenue)} · مصروف {fmt(r.expenses)}</span>
+                  <span className={`w-28 text-end tabular-nums ${r.profit < 0 ? "text-red-400" : ""}`}>{fmt(r.profit)}</span>
+                </div>
+              ))}
+              <div className="flex items-center text-sm border-t border-neutral-800 pt-1.5"><span className="flex-1">ربح الفروع قبل مصروفات الإدارة</span><b className="tabular-nums">{fmt(data.pl.branchesProfit)}</b></div>
+              {data.pl.withHq && (
+                <>
+                  <div className="flex items-center text-sm"><span className="flex-1">مصروفات الإدارة المركزية (عمومية وإدارية)</span><b className="tabular-nums text-red-400">−{fmt(data.pl.hqExpenses)}</b></div>
+                  {data.pl.hqRevenue ? <div className="flex items-center text-sm"><span className="flex-1">إيرادات دفتر الإدارة</span><b className="tabular-nums">{fmt(data.pl.hqRevenue)}</b></div> : null}
+                </>
+              )}
+              <div className="flex items-center text-sm border-t border-neutral-800 pt-1.5"><span className="flex-1 font-semibold">ربح المجموعة</span><b className={`tabular-nums ${data.pl.groupProfit < 0 ? "text-red-400" : "text-emerald-400"}`}>{fmt(data.pl.groupProfit)}</b></div>
+              <p className="text-[11px] text-neutral-500">الأرقام تراكمية حتى التاريخ المختار.{data.pl.withHq ? "" : " لا فرع رئيسي للإدارة — مصروفاتها غير مفصولة."}</p>
+            </div>
+          )}
+          {data.intercompany?.length > 0 && (
+            <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-3 space-y-1.5" data-consolidated-ic>
+              <div className="text-xs font-semibold text-amber-400">ما بين الإدارة والفروع — يُستبعد من الموحّد</div>
+              <p className="text-[11px] text-neutral-500">ما أرسله دفترٌ واستلمه آخر يتقابل ويُحذف من المجموع (لا ربح داخلي). الباقي «في الطريق» فعلًا أو مستحقٌّ بين الدفاتر.</p>
+              {data.intercompany.map((a) => (
+                <div key={a.code} className="text-xs">
+                  <div className="flex items-center"><span className="font-mono text-neutral-500 w-12">{a.code}</span><span className="flex-1">{a.name}</span>
+                    <span className={`tabular-nums ${Math.abs(a.total) < 0.01 ? "text-emerald-400" : "text-amber-300"}`}>{Math.abs(a.total) < 0.01 ? "✓ متقابل" : `في الطريق ${fmt(a.total)}`}</span></div>
+                  {a.branches.map((b) => <div key={b.branchId} className="flex text-neutral-500 ps-12"><span className="flex-1">{b.name}</span><span className="tabular-nums">{fmt(b.balance)}</span></div>)}
+                </div>
+              ))}
+            </div>
+          )}
+
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث برقم الحساب أو اسمه"
             className="w-full rounded-lg bg-neutral-800 border border-neutral-700 px-3 py-2 text-sm" />
 
