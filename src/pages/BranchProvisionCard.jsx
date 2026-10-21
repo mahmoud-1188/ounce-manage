@@ -11,7 +11,9 @@ const PROFILE_FIELDS = [
   ["address", "العنوان"], ["website", "الموقع الإلكتروني", true],
 ];
 const KARATS = ["24", "22", "21", "18"];
-const THRESHOLDS = [["expense", "حدّ المصروف"], ["refund", "حدّ الردّ"], ["supplier_settle", "حدّ السداد"]];
+const THRESHOLDS = [["expense", "حدّ المصروف"], ["refund", "حدّ الردّ"], ["supplier_settle", "حدّ السداد"], ["asset_purchase", "حدّ شراء أصل"],
+  ["payroll_run", "حدّ مسيّر الرواتب"], ["journal_reverse", "حدّ القيد العكسي"], ["count_variance", "حدّ فرق عدّ الصندوق"], ["safe_audit", "حدّ فرق جرد الخزنة"],
+  ["workshop_wastage", "حدّ هدر الورشة الزائد"]];
 
 /**
  * تجهيز الفرع من الإدارة (HqBranchProvisionForm في المرجع) — هويته على
