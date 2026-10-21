@@ -19,7 +19,7 @@ const wf = new Intl.NumberFormat("en-US", { maximumFractionDigits: 3, minimumFra
 const LAYOUT = {
   big: [
     { key: "branches", title: "الفروع", hint: "عرض · تجهيز · صلاحيات", icon: Building2, tone: "central",
-      items: [["branches", "إدارة الفروع والجرد عن بُعد"], ["dashboard", "لوحة الإدارة"], ["policy", "الصلاحيات"], ["org", "الهيكل الإداري"], ["users", "الموظفون"]] },
+      items: [["branches", "إدارة الفروع والجرد عن بُعد"], ["stocktake", "جرد الفروع — قفلٌ وعدٌّ بالمسح"], ["dashboard", "لوحة الإدارة"], ["policy", "الصلاحيات"], ["org", "الهيكل الإداري"], ["users", "الموظفون"]] },
     { key: "approvals", title: "الاعتمادات", hint: "طلبات الفروع", icon: Check, tone: "accounting",
       items: [["approvals", "طلبات الفروع وسياسة الاعتماد"]] },
     { key: "ship", title: "الشحن والتكويد", hint: "بضاعة · نقد · معاملات", icon: Send, tone: "inventory",

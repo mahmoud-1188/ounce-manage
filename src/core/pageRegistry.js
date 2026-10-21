@@ -1,4 +1,4 @@
-import { Bug, Tag, KeyRound, Inbox, FolderCog, LayoutDashboard, Building2, BarChart3, LineChart, Users, Send, SlidersHorizontal, Scale, Receipt, ShieldCheck, LockKeyhole, CalendarCheck, Network, History, Landmark } from "lucide-react";
+import { Bug, Tag, KeyRound, Inbox, FolderCog, LayoutDashboard, Building2, BarChart3, LineChart, Users, Send, SlidersHorizontal, Scale, Receipt, ShieldCheck, LockKeyhole, CalendarCheck, Network, History, Landmark, ClipboardCheck } from "lucide-react";
 
 /**
  * سجلّ شاشات التطبيق المركزي — نظير NAV_REGISTRY في ounce-frontend.
@@ -53,6 +53,8 @@ const PAGE_REGISTRY = [
   // المرجع 5.2.0 (قرار المالك 2026-09-29): زكاة الفروع — كل فرعٍ على سطره ثم إجمالي المجموعة
   { id: "zakat", label: "زكاة الفروع", icon: Landmark },
   { id: "netWeight", label: "صافي الفروع بالوزن", icon: Scale },
+  // جرد الفروع من الإدارة (المرجع HqBranchStocktakePage): قفل المخزون والعدّ بالمسح وإرسال النتيجة
+  { id: "stocktake", label: "جرد الفروع", icon: ClipboardCheck },
   { id: "expenses", label: "المصروفات", icon: Receipt },
   { id: "approvals", label: "الاعتمادات", icon: ShieldCheck },
   // الشاشات والعمليات: ما تمنعه الإدارة أو تمنحه لكل دور في الفروع
@@ -90,7 +92,7 @@ function effectivePages(storeUser) {
  * «البسيط» بالأبواب نفسها. الصلاحية كما هي: بابٌ بلا شاشةٍ مسموحة لا يظهر.
  */
 const HQ_HUBS = [
-  { key: "branches", label: "الفروع", icon: Building2, pages: ["home", "branches"] },
+  { key: "branches", label: "الفروع", icon: Building2, pages: ["home", "branches", "stocktake"] },
   { key: "inbox", label: "الوارد", icon: Inbox, pages: ["approvals", "hqDocs", "coding"] },
   { key: "control", label: "التحكّم والإرسال", icon: SlidersHorizontal, pages: ["control", "policy"] },
   { key: "money", label: "المال", icon: Receipt, pages: ["expenses", "consolidated", "fiscal"] },

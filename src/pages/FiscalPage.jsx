@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { CalendarCheck, Lock } from "lucide-react";
 import { storeApi } from "../core/api.js";
 import { hqError } from "../ui/hqErrors.js";
+import GroupVatCard from "./GroupVatCard.jsx";
+import { GroupCloseCard, PeriodLockSender } from "./GroupCloseCards.jsx";
 
 const nf = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2, minimumFractionDigits: 2 });
 
@@ -30,6 +32,9 @@ export default function FiscalPage({ canManage }) {
       </div>
       <p className="text-xs text-neutral-400">إقفال الشهر يحفظ أرقامه كما هي يوم الإقفال (لكل حساب) باسم من أقفل — ويراه الفرع. لا يُقفل الشهر الجاري.</p>
       {error && <div className="text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-lg px-3 py-2">{error}</div>}
+      <GroupVatCard canManage={canManage} />
+      {data && <GroupCloseCard branches={data} canManage={canManage} onDone={load} />}
+      {data && <PeriodLockSender branches={data} canManage={canManage} onDone={load} />}
       {!data ? <div className="text-neutral-400 text-sm">جارِ التحميل…</div> : data.map((b) => {
         const openMonths = b.months.filter((m) => !m.closed);
         const last = b.closes[b.closes.length - 1];
@@ -41,7 +46,7 @@ export default function FiscalPage({ canManage }) {
             </div>
             <div className="text-xs text-neutral-400">
               أشهرٌ مقفلة {b.closes.length} · مفتوحة من الماضي <b className={openMonths.length ? "text-amber-300" : "text-emerald-400"}>{openMonths.length}</b>
-              {(b.lockAll || b.lockPosted) && <span className="inline-flex items-center gap-1 ms-2"><Lock size={12} /> قفل الفترات حتى {b.lockAll || b.lockPosted}{b.lockAll ? " (نهائي)" : " (عدا المدير)"}</span>}
+              {(b.lockAll || b.lockPosted) && <span className="inline-flex items-center gap-1 ms-2"><Lock size={12} /> قفل الفترات حتى {b.lockAll || b.lockPosted}{b.lockAll ? " (نهائي)" : " (عدا المدير)"}{b.hqLockAll || b.hqLockPosted ? " · من الإدارة" : ""}</span>}
             </div>
             {b.months.length === 0 && <div className="text-xs text-neutral-500">لا قيود في أشهرٍ ماضية.</div>}
             <div className="flex flex-wrap gap-1.5">
