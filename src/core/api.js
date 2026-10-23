@@ -150,6 +150,8 @@ const storeApi = {
    */
   // التفويض بضغطة (migration 072)
   fetchDelegation: (branchId) => apiFetch(`/store/branches/${branchId}/delegation`),
+  /** ما مضى بلا موافقة في الفرع بتفويض الإدارة (migration 102) */
+  fetchWaived: (branchId, days = 30) => apiFetch(`/store/branches/${branchId}/waived?days=${days}`),
   setDelegation: (branchId, patch) => apiFetch(`/store/branches/${branchId}/delegation`, { method: "POST", body: patch }),
   setBranchLock: (branchId, locked, reason) =>
     apiFetch(`/store/branches/${branchId}/lock`, { method: "PATCH", body: { locked, reason } }),
