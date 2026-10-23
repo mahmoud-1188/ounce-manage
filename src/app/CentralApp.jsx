@@ -45,6 +45,8 @@ export default function CentralApp() {
   // ⚠ يُحدَّد فعليًّا بعد معرفة صلاحيات المستخدم (انظر الدالتين أدناه) —
   // "home" هنا افتراضٌ أوّلي فقط لموظفٍ قد لا يملك صلاحية رؤيتها أصلًا.
   const [tab, setTab] = useState("home");
+  // قسم «التحكّم والإرسال» المفتوح: price · notices · close · orders (المرجع HQ_CONSOLE_TABS)
+  const [controlSection, setControlSection] = useState("price");
   // ⚠ طبقة فوق التبويبات لا بديلًا عنها: يدخل "تفاصيل فرع" من أي تبويب
   // (الرئيسية أو الفروع)، ويرجع لنفس التبويب الذي جاء منه — لا لتبويبٍ
   // ثابت دائمًا.
@@ -113,10 +115,18 @@ export default function CentralApp() {
 
   const canManage = storeUser?.role === "owner" || !!storeUser?.canManageBranches;
   const allowed = effectivePages(storeUser);
-  const go = (next) => { setOpenBranch(null); setMenuOpen(false); setTab(next); };
+  // «control:<قسم>» يفتح «التحكّم والإرسال» على قسمه، و«fiscal» على الإقفال (كما في المرجع)
+  const route = (next) => {
+    if (next === "fiscal") { setControlSection("close"); return "control"; }
+    if (String(next).startsWith("control:")) { setControlSection(next.slice(8)); return "control"; }
+    if (next === "control") setControlSection("price");
+    return next;
+  };
+  const go = (next) => { setOpenBranch(null); setMenuOpen(false); setTab(route(next)); };
 
   // الشاشة غير المسموحة لا تُرسم أصلًا (الخادم يرفض بياناتها أيضًا) — تُعرض أوّل شاشةٍ مسموحة
-  const tabAllowed = tab === "users" ? storeUser?.role === "owner" : allowed.includes(tab) || (tab === "dashboard" && allowed.includes("home"));
+  const tabAllowed = tab === "users" ? storeUser?.role === "owner"
+    : allowed.includes(tab) || (tab === "dashboard" && allowed.includes("home")) || (tab === "control" && allowed.includes("fiscal"));
   const homeTab = allowed.includes("home") ? "home" : allowed[0] || "home";
   const pageBody = !openBranch && !tabAllowed ? (
     <div className="text-sm text-neutral-400 py-10 text-center" data-page-denied>
@@ -155,7 +165,9 @@ export default function CentralApp() {
         ) : tab === "control" ? (
           <ControlPage canManage={storeUser?.role === "owner" || !!storeUser?.canManageBranches}
             isOwner={storeUser?.role === "owner"} accountingMode={storeUser?.accountingMode || "detailed"}
-            onAccountingMode={(m) => setStoreUser((u) => ({ ...u, accountingMode: m }))} />
+            onAccountingMode={(m) => setStoreUser((u) => ({ ...u, accountingMode: m }))}
+            section={controlSection} onSection={setControlSection}
+            sections={[...(allowed.includes("control") ? ["price", "notices"] : []), "close", ...(allowed.includes("control") ? ["orders"] : [])]} />
         ) : tab === "consolidated" ? (
           <ConsolidatedPage />
         ) : tab === "zakat" ? (
@@ -255,7 +267,7 @@ export default function CentralApp() {
       <TopBar
         storeUser={storeUser}
         tab={tab}
-        onTabChange={(next) => { setOpenBranch(null); setTab(next); }}
+        onTabChange={(next) => { setOpenBranch(null); setTab(route(next)); }}
         onLogout={handleLogout}
         design={design}
         onDesign={changeDesign}

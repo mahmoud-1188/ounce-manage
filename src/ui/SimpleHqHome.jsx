@@ -28,9 +28,9 @@ const LAYOUT = {
   small: [
     // التحكّم والإرسال (المرجع): ما ترسله الإدارة للفروع — السعر والأهداف · الإعلانات · الإقفال
     { key: "control", title: "التحكّم والإرسال", icon: RadioTower, tone: "links",
-      items: [["control", "السعر والأهداف والإعلانات"], ["fiscal", "الإقفال — الشهر وقفل الفترات"]] },
+      items: [["control:price", "التحكّم — السعر والأهداف"], ["control:notices", "الإعلانات"], ["control:close", "الإقفال"], ["control:orders", "أوامر للفروع"]] },
     { key: "money", title: "المال", icon: Wallet, tone: "money",
-      items: [["expenses", "المصروفات وعمولة البنك"], ["fiscal", "السنة المالية وإقفال الأشهر"], ["consolidated", "الميزان الموحّد"]] },
+      items: [["expenses", "المصروفات وعمولة البنك"], ["consolidated", "الميزان الموحّد"]] },
     { key: "reports", title: "التقارير", icon: BarChart3, tone: "reports",
       items: [["report", "التقرير المجمّع"], ["analytics", "التحليلات"], ["consolidated", "الموحّد"], ["zakat", "زكاة الفروع"], ["netWeight", "صافي الفروع بالوزن"], ["opsLog", "سجلّ عمليات الإدارة"], ["clientErrors", "أعطال الفروع"], ["apiKeys", "الواجهة البرمجية"], ["dashboard", "لوحة الإدارة"]] },
   ],
@@ -49,7 +49,10 @@ export default function SimpleHqHome({ allowed = [], isOwner = false, onGo, onOp
     storeApi.fetchStoreApprovals().then((d) => setInbox((d.approvals || []).filter((a) => a.status === "pending" && a.approverKind === "hq").length)).catch(() => {});
     storeApi.fetchPricePolicy().then((d) => setSell24(hqSell24(d.policy))).catch(() => {});
   }, []);
-  const has = (id) => (id === "dashboard" ? allowed.includes("home") : id === "users" ? isOwner : allowed.includes(id));
+  // أقسام التحكّم: الإقفال لمن يملك السنة المالية أو التحكّم، والباقي للتحكّم
+  const has = (id) => (id === "dashboard" ? allowed.includes("home") : id === "users" ? isOwner
+    : id === "control:close" ? allowed.includes("fiscal") || allowed.includes("control")
+    : id.startsWith("control:") ? allowed.includes("control") : allowed.includes(id));
   const withRows = (g) => ({ ...g, rows: g.items.filter(([id]) => has(id)) });
   const big = LAYOUT.big.map(withRows).filter((g) => g.rows.length);
   const small = LAYOUT.small.map(withRows).filter((g) => g.rows.length);

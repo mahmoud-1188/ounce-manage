@@ -184,3 +184,5 @@ function BankFeesDistribution({ canManage }) {
     </div>
   );
 }
+
+export { BankFeesDistribution };

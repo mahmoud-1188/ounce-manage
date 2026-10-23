@@ -309,7 +309,7 @@ function shipErrorMessage(err) {
  * يخرج من خزنة المصدر (الفرع الرئيسي افتراضًا) فورًا إلى «نقدٌ في الطريق»،
  * ويدخل خزنة الوجهة حين يؤكّد الفرع الاستلام من شاشة «معاملات الإدارة».
  */
-function CashTransferModal({ onClose, onCreated }) {
+function CashTransferModal({ onClose, onCreated, toBranchId = "" }) {
   const [branches, setBranches] = useState(null);
   const [fromId, setFromId] = useState("");
   const [toId, setToId] = useState("");
@@ -324,7 +324,8 @@ function CashTransferModal({ onClose, onCreated }) {
       setBranches(rows);
       const hq = rows.find((b) => b.is_hq || b.isHq) || rows[0];
       if (hq) setFromId(hq.id);
-      const other = rows.find((b) => b.id !== hq?.id);
+      const preset = toBranchId && toBranchId !== hq?.id ? rows.find((b) => b.id === toBranchId) : null;
+      const other = preset || rows.find((b) => b.id !== hq?.id);
       if (other) setToId(other.id);
     }).catch(() => setError("تعذّر تحميل الفروع"));
   }, []);
@@ -392,3 +393,5 @@ function CashTransferModal({ onClose, onCreated }) {
     </div>
   );
 }
+
+export { CashTransferModal, ShipCodingModal };
