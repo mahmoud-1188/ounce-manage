@@ -196,6 +196,7 @@ const storeApi = {
   /** GET/PUT /store/price-policy — زيادة الإدارة على السعر العالمي لكل الفروع */
   fetchPricePolicy: () => apiFetch("/store/price-policy"),
   savePricePolicy: (payload) => apiFetch("/store/price-policy", { method: "PUT", body: payload }),
+  saveAccountingMode: (mode) => apiFetch("/store/accounting-mode", { method: "PUT", body: { mode } }),
 
   /** إعلانات الإدارة — تظهر في رئيسية كل فرع حتى تاريخ انتهائها */
   fetchNotices: () => apiFetch("/store/notices"),

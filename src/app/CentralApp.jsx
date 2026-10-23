@@ -152,7 +152,9 @@ export default function CentralApp() {
             <CodingQueueCard canCode={storeUser?.role === "owner" || !!storeUser?.canSendCoding} canManage={canManage} />
           </div>
         ) : tab === "control" ? (
-          <ControlPage canManage={storeUser?.role === "owner" || !!storeUser?.canManageBranches} />
+          <ControlPage canManage={storeUser?.role === "owner" || !!storeUser?.canManageBranches}
+            isOwner={storeUser?.role === "owner"} accountingMode={storeUser?.accountingMode || "detailed"}
+            onAccountingMode={(m) => setStoreUser((u) => ({ ...u, accountingMode: m }))} />
         ) : tab === "consolidated" ? (
           <ConsolidatedPage />
         ) : tab === "zakat" ? (

@@ -138,6 +138,10 @@ export default function BranchProvisionCard({ branchId, canManage }) {
                 <select className={inp} disabled={ro} value={settings.approvalsEnabled === false ? "0" : "1"} onChange={(e) => S("approvalsEnabled", e.target.value === "1")}>
                   <option value="1">مفعّل</option><option value="0">معطّل</option>
                 </select></label>
+              <label className="text-[11px] text-neutral-400 space-y-1"><span>المحاسبة في الفرع</span>
+                <select className={inp} disabled={ro} value={settings.accountingMode || ""} onChange={(e) => S("accountingMode", e.target.value || undefined)}>
+                  <option value="">كما في الفرع</option><option value="detailed">مفصّلة</option><option value="simple">بسيطة</option>
+                </select></label>
               <label className="text-[11px] text-neutral-400 space-y-1"><span>فحص الكسر</span>
                 <select className={inp} disabled={ro} value={settings.scrapAssayMode || "hq"} onChange={(e) => S("scrapAssayMode", e.target.value)}>
                   <option value="hq">الإدارة</option><option value="branch">الفرع</option>

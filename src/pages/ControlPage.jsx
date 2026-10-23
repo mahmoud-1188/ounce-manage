@@ -19,7 +19,7 @@ function applyMarkup(world, mode, value) {
  *   ② إعلاناتٌ تظهر في رئيسية كل فرع حتى تاريخ انتهائها.
  *   ③ أهداف مبيعات ٣٠ يومًا لكل فرع ونسبة تحقيقها.
  */
-export default function ControlPage({ canManage }) {
+export default function ControlPage({ canManage, isOwner = false, accountingMode = "detailed", onAccountingMode }) {
   const [policy, setPolicy] = useState(null);
   const [mode, setMode] = useState("amount");
   const [value, setValue] = useState("");
@@ -78,6 +78,31 @@ export default function ControlPage({ canManage }) {
       <h2 className="text-lg font-semibold">التحكّم</h2>
       {error && <div className="text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-lg px-3 py-2">{error}</div>}
       {msg && <div className="text-sm text-emerald-300 bg-emerald-950/40 border border-emerald-900 rounded-lg px-3 py-2">{msg}</div>}
+
+      {isOwner && (
+        <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4 space-y-3" data-accounting-mode>
+          <h3 className="text-sm font-semibold">المحاسبة في الإدارة — بسيطة أو مفصّلة</h3>
+          <p className="text-xs text-neutral-400">
+            «بسيطة» تُخفي الدفاتر التفصيلية (الميزان الموحّد والسنة المالية) وتُبقي الفروع والتقارير والزكاة والصافي بالوزن والاعتمادات.
+            تخفي ولا تحذف: القيود تُرحَّل في الحالين. وضع كل فرعٍ يُرسل من «تجهيز الفرع».
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {[["detailed", "مفصّلة"], ["simple", "بسيطة"]].map(([id, l]) => (
+              <button key={id} type="button" disabled={busy}
+                onClick={async () => {
+                  if (id === accountingMode) return;
+                  setBusy(true); setError("");
+                  try { await storeApi.saveAccountingMode(id); onAccountingMode?.(id); flash(id === "simple" ? "المحاسبة الآن بسيطة" : "المحاسبة الآن مفصّلة"); }
+                  catch (e) { setError("تعذّر حفظ وضع المحاسبة"); }
+                  finally { setBusy(false); }
+                }}
+                className={`rounded-lg px-3 py-2 text-sm border ${id === accountingMode ? "border-amber-500 bg-amber-500/10 text-amber-300" : "border-neutral-700 text-neutral-300"}`}>
+                {l}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="rounded-xl border border-amber-500/30 bg-neutral-900 p-4 space-y-3">
         <div className="flex items-center gap-2">
