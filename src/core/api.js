@@ -338,6 +338,9 @@ const storeApi = {
   issueSharedDeviceCode: (branchId) => apiFetch(`/store/branches/${branchId}/shared-device-invite`, { method: "POST", body: {} }),
   issueEnrollCode: (branchId, userId) => apiFetch(`/store/branches/${branchId}/users/${userId}/enroll-invite`, { method: "POST", body: {} }),
   setUserHqRole: (id, hqRole) => apiFetch(`/store/users/${id}/hq-role`, { method: "PATCH", body: { hqRole } }),
+  // تكويد الافتتاح في الفرع: الإدارة تُنهيه أو تعيد فتحه بسبب
+  fetchOpeningPhase: (branchId) => apiFetch(`/store/branches/${branchId}/opening`),
+  setOpeningPhase: (branchId, to, reason) => apiFetch(`/store/branches/${branchId}/opening`, { method: "POST", body: { to, reason } }),
   // مساعد الإدارة: نصّ المحادثة وحده — الخادم يرفق أرقام الفروع بنفسه
   askAssistant: (messages) => apiFetch("/store/ai/chat", { method: "POST", body: { messages } }),
 };
