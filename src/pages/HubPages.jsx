@@ -3,11 +3,11 @@ import CashTransitCard from "./CashTransitCard.jsx";
 import GoodsTransitCard from "./GoodsTransitCard.jsx";
 
 /** التنبيهات (المرجع hqConsole:alerts في باب «الوارد»): ما يحتاج انتباهك في الفروع، وكلٌّ يفتح فرعه. */
-function AlertsPage({ onOpenBranch }) {
+function AlertsPage({ onOpenBranch, onOpenApprovals, onOpenTransit }) {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">التنبيهات</h2>
-      <AlertsCard onOpenBranch={onOpenBranch} />
+      <AlertsCard onOpenBranch={onOpenBranch} onOpenApprovals={onOpenApprovals} onOpenTransit={onOpenTransit} />
     </div>
   );
 }

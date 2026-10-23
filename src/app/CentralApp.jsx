@@ -181,7 +181,8 @@ export default function CentralApp() {
         ) : tab === "consolidated" ? (
           <ConsolidatedPage />
         ) : tab === "alerts" ? (
-          <AlertsPage onOpenBranch={openBranchDetail} />
+          <AlertsPage onOpenBranch={openBranchDetail} onOpenTransit={() => go("transit")}
+            onOpenApprovals={effectivePages(storeUser).includes("approvals") ? () => go("approvals") : undefined} />
         ) : tab === "transit" ? (
           <TransitPage />
         ) : tab === "wastage" ? (
