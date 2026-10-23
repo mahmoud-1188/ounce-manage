@@ -13,6 +13,7 @@ import ControlPage from "../pages/ControlPage.jsx";
 import ConsolidatedPage from "../pages/ConsolidatedPage.jsx";
 import ZakatPage from "../pages/ZakatPage.jsx";
 import NetWeightPage from "../pages/NetWeightPage.jsx";
+import AssistantPage from "../pages/AssistantPage.jsx";
 import StocktakePage from "../pages/StocktakePage.jsx";
 import ClientErrorsPage from "../pages/ClientErrorsPage.jsx";
 import ApiKeysPage from "../pages/ApiKeysPage.jsx";
@@ -161,6 +162,8 @@ export default function CentralApp() {
           <ZakatPage />
         ) : tab === "netWeight" ? (
           <NetWeightPage />
+        ) : tab === "assistant" ? (
+          <AssistantPage />
         ) : tab === "stocktake" ? (
           <StocktakePage canManage={storeUser?.role === "owner" || !!storeUser?.canManageBranches} />
         ) : tab === "clientErrors" ? (

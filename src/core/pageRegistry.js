@@ -1,4 +1,4 @@
-import { Bug, Tag, KeyRound, Inbox, FolderCog, LayoutDashboard, Building2, BarChart3, LineChart, Users, Send, SlidersHorizontal, Scale, Receipt, ShieldCheck, LockKeyhole, CalendarCheck, Network, History, Landmark, ClipboardCheck } from "lucide-react";
+import { Bot, Bug, Tag, KeyRound, Inbox, FolderCog, LayoutDashboard, Building2, BarChart3, LineChart, Users, Send, SlidersHorizontal, Scale, Receipt, ShieldCheck, LockKeyhole, CalendarCheck, Network, History, Landmark, ClipboardCheck } from "lucide-react";
 
 /**
  * سجلّ شاشات التطبيق المركزي — نظير NAV_REGISTRY في ounce-frontend.
@@ -65,6 +65,8 @@ const PAGE_REGISTRY = [
   { id: "opsLog", label: "سجلّ الإدارة", icon: History },
   { id: "clientErrors", label: "أعطال الفروع", icon: Bug },
   { id: "apiKeys", label: "الواجهة البرمجية", icon: KeyRound },
+  // المساعد (المرجع 2026-10-12 ز): أسئلة الفروع مجتمعةً كتابةً وصوتًا، من أرقامها الفعلية
+  { id: "assistant", label: "المساعد", icon: Bot },
 ];
 
 const USERS_PAGE = { id: "users", label: "الموظفون", icon: Users };
@@ -100,7 +102,7 @@ const HQ_HUBS = [
   { key: "inbox", label: "الوارد", icon: Inbox, pages: ["approvals", "hqDocs", "coding"] },
   { key: "control", label: "التحكّم والإرسال", icon: SlidersHorizontal, pages: ["control", "policy"] },
   { key: "money", label: "المال", icon: Receipt, pages: ["expenses", "consolidated", "fiscal"] },
-  { key: "reports", label: "التقارير", icon: BarChart3, pages: ["report", "analytics", "zakat", "netWeight"] },
+  { key: "reports", label: "التقارير", icon: BarChart3, pages: ["report", "analytics", "zakat", "netWeight", "assistant"] },
   { key: "admin", label: "الإدارة", icon: FolderCog, pages: ["org", "opsLog", "clientErrors", "apiKeys", "users"] },
 ];
 
