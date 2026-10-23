@@ -4,12 +4,13 @@ import { storeApi } from "../core/api.js";
 import { hqError } from "../ui/hqErrors.js";
 import GroupVatCard from "./GroupVatCard.jsx";
 import { GroupCloseCard, PeriodLockSender } from "./GroupCloseCards.jsx";
+import YearCloseCard from "./YearCloseCard.jsx";
 
 const nf = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2, minimumFractionDigits: 2 });
 
 /**
  * السنة المالية للفروع (المرجع HqFiscalTab · migration 061): لكل فرع الأشهر الماضية التي فيها قيود،
- * المقفل منها (بلقطته: الإيراد والمصروف والصافي) والمفتوح، وقفل الفترات — وإقفال شهرٍ من الإدارة.
+ * المقفل منها (بلقطته: الإيراد والمصروف والصافي) والمفتوح، وقفل الفترات — وإقفال شهرٍ أو سنةٍ من الإدارة.
  * ⚠ الإقفال لقطةٌ ثابتة لأرقام الشهر باسم من أقفل؛ القيود تُؤرَّخ بلحظة ترحيلها فلا يدخل الشهرَ المقفل قيدٌ جديد.
  */
 export default function FiscalPage({ canManage }) {
@@ -87,6 +88,7 @@ export default function FiscalPage({ canManage }) {
                 </div>
               );
             })}
+            <YearCloseCard branch={b} canManage={canManage} />
           </div>
         );
       })}
