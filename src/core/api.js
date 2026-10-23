@@ -337,6 +337,8 @@ const storeApi = {
   issueSharedDeviceCode: (branchId) => apiFetch(`/store/branches/${branchId}/shared-device-invite`, { method: "POST", body: {} }),
   issueEnrollCode: (branchId, userId) => apiFetch(`/store/branches/${branchId}/users/${userId}/enroll-invite`, { method: "POST", body: {} }),
   setUserHqRole: (id, hqRole) => apiFetch(`/store/users/${id}/hq-role`, { method: "PATCH", body: { hqRole } }),
+  // مساعد الإدارة: نصّ المحادثة وحده — الخادم يرفق أرقام الفروع بنفسه
+  askAssistant: (messages) => apiFetch("/store/ai/chat", { method: "POST", body: { messages } }),
 };
 
 export {
