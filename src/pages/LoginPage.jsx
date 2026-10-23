@@ -1,4 +1,5 @@
 import { useState } from "react";
+import LangToggle from "../ui/LangToggle.jsx";
 import { login, ApiError } from "../core/api.js";
 
 /**
@@ -48,6 +49,7 @@ export default function LoginPage({ onLoggedIn }) {
           />
           <h1 className="text-lg font-semibold">الإدارة المركزية</h1>
           <p className="text-xs text-neutral-400">أونصة — Awnsah</p>
+          <div className="flex justify-center pt-1"><LangToggle /></div>
         </div>
 
         <div className="space-y-1.5">

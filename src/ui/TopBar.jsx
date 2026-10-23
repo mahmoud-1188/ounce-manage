@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { LogOut, Palette } from "lucide-react";
 import DesignPicker from "./DesignPicker.jsx";
+import LangToggle from "./LangToggle.jsx";
 import { hubOfPage, visibleHubs } from "../core/pageRegistry.js";
 
 export default function TopBar({ storeUser, tab, onTabChange, onLogout, design, onDesign }) {
@@ -33,6 +34,8 @@ export default function TopBar({ storeUser, tab, onTabChange, onLogout, design, 
             )}
           </div>
         )}
+
+        <LangToggle className="order-2 sm:order-3" />
 
         <button
           type="button"
