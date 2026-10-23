@@ -76,6 +76,9 @@ const canCode = (u) => u?.role === "owner" || !!u?.canSendCoding;
 // باقة «بدون محاسبة» (migration 070 في الخادم): شاشات الإدارة المحاسبية تُخفى (والخادم يرفض مساراتها)
 const ACCOUNTING_PAGES = ["consolidated", "fiscal", "zakat", "netWeight"];
 const noAccounting = (storeUser) => storeUser?.storePackage === "no_accounting";
+// المحاسبة «البسيطة» (migration 097): تُخفي الدفاتر التفصيلية وحدها — الميزان الموحّد والسنة المالية
+const DETAILED_BOOKS_PAGES = ["consolidated", "fiscal"];
+const simpleAccounting = (storeUser) => storeUser?.accountingMode === "simple";
 
 function effectivePages(storeUser) {
   if (!storeUser) return [];
@@ -83,7 +86,8 @@ function effectivePages(storeUser) {
     ? PAGE_REGISTRY.map((p) => p.id)
     : PAGE_REGISTRY.filter((p) => storeUser.allowedPages.includes(p.id)).map((p) => p.id);
   if (canCode(storeUser)) pages.push("coding");
-  return noAccounting(storeUser) ? pages.filter((id) => !ACCOUNTING_PAGES.includes(id)) : pages;
+  if (noAccounting(storeUser)) return pages.filter((id) => !ACCOUNTING_PAGES.includes(id));
+  return simpleAccounting(storeUser) ? pages.filter((id) => !DETAILED_BOOKS_PAGES.includes(id)) : pages;
 }
 
 /**
@@ -112,4 +116,4 @@ function visibleHubs(storeUser) {
 
 const hubOfPage = (id) => HQ_HUBS.find((h) => h.pages.includes(id)) || null;
 
-export { CODING_PAGE, HQ_HUBS, PAGE_REGISTRY, USERS_PAGE, effectivePages, hubOfPage, visibleHubs, noAccounting };
+export { CODING_PAGE, HQ_HUBS, PAGE_REGISTRY, USERS_PAGE, effectivePages, hubOfPage, visibleHubs, noAccounting, simpleAccounting };
