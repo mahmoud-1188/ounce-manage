@@ -46,7 +46,7 @@ const PAGE_REGISTRY = [
   // 027_hq_transactions.sql وcanSendCoding في UsersPage.jsx.
   { id: "hqDocs", label: "معاملات الإدارة", icon: Send },
   // التحكّم (v197): زيادة الإدارة على السعر العالمي وإعلاناتها لكل الفروع
-  { id: "control", label: "التحكّم", icon: SlidersHorizontal },
+  { id: "control", label: "التحكّم والإرسال", icon: SlidersHorizontal },
   // لوحة الإدارة (المركزي المعدّل): الميزان الموحّد · مصروفات الفروع وعمولة
   // البنك مركزيًّا · الاعتمادات (من يعتمد ماذا + صندوق الطلبات)
   { id: "consolidated", label: "الموحّد", icon: Scale },
@@ -100,15 +100,17 @@ function effectivePages(storeUser) {
 const HQ_HUBS = [
   { key: "branches", label: "الفروع", icon: Building2, pages: ["home", "branches", "stocktake"] },
   { key: "inbox", label: "الوارد", icon: Inbox, pages: ["approvals", "hqDocs", "coding"] },
-  { key: "control", label: "التحكّم والإرسال", icon: SlidersHorizontal, pages: ["control", "policy"] },
-  { key: "money", label: "المال", icon: Receipt, pages: ["expenses", "consolidated", "fiscal"] },
+  { key: "control", label: "التحكّم والإرسال", icon: SlidersHorizontal, pages: ["control"] },
+  { key: "money", label: "المال", icon: Receipt, pages: ["expenses", "consolidated"] },
   { key: "reports", label: "التقارير", icon: BarChart3, pages: ["report", "analytics", "zakat", "netWeight", "assistant"] },
-  { key: "admin", label: "الإدارة", icon: FolderCog, pages: ["org", "opsLog", "clientErrors", "apiKeys", "users"] },
+  { key: "admin", label: "الإدارة", icon: FolderCog, pages: ["policy", "org", "opsLog", "clientErrors", "apiKeys", "users"] },
 ];
 
 /** الأبواب بشاشاتها المسموحة (`users` للمالك وحده). */
 function visibleHubs(storeUser) {
   const allowed = new Set(effectivePages(storeUser));
+  // الإقفال صار قسمًا في «التحكّم والإرسال»: من يملك السنة المالية يدخله ولو بلا التحكّم
+  if (allowed.has("fiscal")) allowed.add("control");
   if (storeUser?.role === "owner") allowed.add("users");
   const byId = new Map([...PAGE_REGISTRY, USERS_PAGE, CODING_PAGE].map((p) => [p.id, p]));
   return HQ_HUBS

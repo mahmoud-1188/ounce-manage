@@ -2,6 +2,11 @@ import { useEffect, useState } from "react";
 import { Coins, Megaphone, Trash2 } from "lucide-react";
 import { storeApi } from "../core/api.js";
 import TargetsCard from "./TargetsCard.jsx";
+import FiscalPage from "./FiscalPage.jsx";
+import OrdersPanel from "./OrdersPanel.jsx";
+
+// أقسام «التحكّم والإرسال» كما في المرجع (HQ_CONSOLE_TABS: price · notices · close · orders)
+const SECTIONS = [["price", "السعر والأهداف"], ["notices", "الإعلانات"], ["close", "الإقفال"], ["orders", "أوامر للفروع"]];
 
 const money = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmt = (n) => money.format(Number(n) || 0);
@@ -13,13 +18,15 @@ function applyMarkup(world, mode, value) {
 }
 
 /**
- * التحكّم — ما تعتمده الإدارة لكل الفروع (v197 في المرجع):
- *   ① زيادة الإدارة على السعر العالمي: سعر العمل في الفروع = العالمي +
- *      الزيادة (ريال/جم24 أو ٪)، وعالمي يدوي اختياري يحلّ محلّ الجلب الآلي.
- *   ② إعلاناتٌ تظهر في رئيسية كل فرع حتى تاريخ انتهائها.
- *   ③ أهداف مبيعات ٣٠ يومًا لكل فرع ونسبة تحقيقها.
+ * التحكّم والإرسال — ما ترسله الإدارة للفروع، بأقسام المرجع الأربعة:
+ *   ① السعر والأهداف: زيادة الإدارة على السعر العالمي (سعر العمل = العالمي + الزيادة) وأهداف ٣٠ يومًا.
+ *   ② الإعلانات: تظهر في رئيسية كل فرع حتى تاريخ انتهائها.
+ *   ③ الإقفال: إقفال الشهر وقفل الفترات والسنة المالية للفروع.
+ *   ④ أوامر للفروع: تحويل نقد · شراء · سحب رأس مال · جرد · تسوية · عمولة البنك · بضاعة.
  */
-export default function ControlPage({ canManage, isOwner = false, accountingMode = "detailed", onAccountingMode }) {
+export default function ControlPage({ canManage, isOwner = false, accountingMode = "detailed", onAccountingMode, section: wanted = "price", onSection, sections = SECTIONS.map(([id]) => id) }) {
+  // القسم المطلوب إن كان من صلاحيات المستخدم، وإلا أوّل قسمٍ يملكه
+  const section = sections.includes(wanted) ? wanted : sections[0];
   const [policy, setPolicy] = useState(null);
   const [mode, setMode] = useState("amount");
   const [value, setValue] = useState("");
@@ -32,6 +39,8 @@ export default function ControlPage({ canManage, isOwner = false, accountingMode
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    // السعر والإعلانات لمن يملك التحكّم وحده — من يملك الإقفال فقط لا يُطلب له ما يرفضه الخادم
+    if (!sections.includes("price")) return;
     storeApi.fetchPricePolicy().then(({ policy: p }) => {
       setPolicy(p);
       setMode(p?.markup?.mode || "amount");
@@ -75,11 +84,19 @@ export default function ControlPage({ canManage, isOwner = false, accountingMode
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">التحكّم</h2>
+      <h2 className="text-lg font-semibold">التحكّم والإرسال</h2>
+      <nav aria-label="أقسام التحكّم والإرسال" className="flex gap-1.5 overflow-x-auto pb-1">
+        {SECTIONS.filter(([id]) => sections.includes(id)).map(([id, label]) => (
+          <button key={id} type="button" aria-current={section === id ? "true" : undefined} onClick={() => onSection?.(id)}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap border ${section === id ? "border-amber-500 bg-amber-500/10 text-amber-300" : "border-neutral-700 text-neutral-300"}`}>
+            {label}
+          </button>
+        ))}
+      </nav>
       {error && <div className="text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-lg px-3 py-2">{error}</div>}
       {msg && <div className="text-sm text-emerald-300 bg-emerald-950/40 border border-emerald-900 rounded-lg px-3 py-2">{msg}</div>}
 
-      {isOwner && (
+      {section === "price" && isOwner && (
         <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4 space-y-3" data-accounting-mode>
           <h3 className="text-sm font-semibold">المحاسبة في الإدارة — بسيطة أو مفصّلة</h3>
           <p className="text-xs text-neutral-400">
@@ -104,6 +121,7 @@ export default function ControlPage({ canManage, isOwner = false, accountingMode
         </div>
       )}
 
+      {section === "price" && (<>
       <div className="rounded-xl border border-amber-500/30 bg-neutral-900 p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Coins size={16} className="text-amber-500" />
@@ -146,7 +164,10 @@ export default function ControlPage({ canManage, isOwner = false, accountingMode
           اترك «السعر العالمي اليدوي» فارغًا ليبقى الجلب آليًّا.
         </p>
       </div>
+      <TargetsCard canManage={canManage} />
+      </>)}
 
+      {section === "notices" && (
       <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Megaphone size={16} className="text-amber-500" />
@@ -182,8 +203,10 @@ export default function ControlPage({ canManage, isOwner = false, accountingMode
           </div>
         )}
       </div>
+      )}
 
-      <TargetsCard canManage={canManage} />
+      {section === "close" && <FiscalPage canManage={canManage} />}
+      {section === "orders" && <OrdersPanel canManage={canManage} />}
     </div>
   );
 }
