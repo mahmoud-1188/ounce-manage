@@ -1,4 +1,5 @@
 import { Bot, Bug, Tag, KeyRound, Inbox, FolderCog, LayoutDashboard, Building2, BarChart3, LineChart, Users, Send, SlidersHorizontal, Scale, Receipt, ShieldCheck, LockKeyhole, CalendarCheck, Network, History, Landmark, ClipboardCheck } from "lucide-react";
+import { HQ_HUBS, hubSheetItems } from "./hqHubs.js";
 
 /**
  * سجلّ شاشات التطبيق المركزي — نظير NAV_REGISTRY في ounce-frontend.
@@ -93,31 +94,50 @@ function effectivePages(storeUser) {
 }
 
 /**
- * أبواب الإدارة (المرجع م4): الشاشات مجمّعةٌ في أبوابٍ بدل ستة عشر تبويبًا في شريطٍ يُمرَّر.
- * كل شاشةٍ في بابٍ واحد؛ الشريط العلوي أبوابٌ، وتحته شاشات الباب المفتوح. وقائمة ☰ في
- * «البسيط» بالأبواب نفسها. الصلاحية كما هي: بابٌ بلا شاشةٍ مسموحة لا يظهر.
+ * هل يملك المستخدم شاشةً من شاشات الأبواب؟ — صفحات هذا التطبيق بصلاحياتها، وأقسام التحكّم من التحكّم
+ * (والإقفال من السنة المالية أيضًا)، وشاشات دفتر الإدارة («book:») للمالك ومن بلا قيد شاشات.
  */
-const HQ_HUBS = [
-  { key: "branches", label: "الفروع", icon: Building2, pages: ["home", "branches", "stocktake"] },
-  { key: "inbox", label: "الوارد", icon: Inbox, pages: ["approvals", "hqDocs", "coding"] },
-  { key: "control", label: "التحكّم والإرسال", icon: SlidersHorizontal, pages: ["control"] },
-  { key: "money", label: "المال", icon: Receipt, pages: ["expenses", "consolidated"] },
-  { key: "reports", label: "التقارير", icon: BarChart3, pages: ["report", "analytics", "zakat", "netWeight", "assistant"] },
-  { key: "admin", label: "الإدارة", icon: FolderCog, pages: ["policy", "org", "opsLog", "clientErrors", "apiKeys", "users"] },
-];
-
-/** الأبواب بشاشاتها المسموحة (`users` للمالك وحده). */
-function visibleHubs(storeUser) {
-  const allowed = new Set(effectivePages(storeUser));
-  // الإقفال صار قسمًا في «التحكّم والإرسال»: من يملك السنة المالية يدخله ولو بلا التحكّم
-  if (allowed.has("fiscal")) allowed.add("control");
-  if (storeUser?.role === "owner") allowed.add("users");
-  const byId = new Map([...PAGE_REGISTRY, USERS_PAGE, CODING_PAGE].map((p) => [p.id, p]));
-  return HQ_HUBS
-    .map((h) => ({ ...h, pages: h.pages.filter((id) => allowed.has(id)).map((id) => byId.get(id)) }))
-    .filter((h) => h.pages.length);
+function viewAllowed(storeUser, allowed, id) {
+  const unrestricted = storeUser?.role === "owner" || storeUser?.allowedPages == null;
+  if (id.startsWith("book:")) return unrestricted && !noAccounting(storeUser);
+  if (id === "control:close") return allowed.has("fiscal") || allowed.has("control");
+  if (id.startsWith("control:")) return allowed.has("control");
+  if (id === "users") return storeUser?.role === "owner";
+  if (id === "dashboard" || id === "alerts") return allowed.has("home");
+  if (id === "compliance") return allowed.has("branches") || allowed.has("home");
+  if (id === "branches:add") return allowed.has("branches") && (storeUser?.role === "owner" || !!storeUser?.canManageBranches);
+  if (id === "transit") return allowed.has("hqDocs");
+  if (id === "wastage") return allowed.has("netWeight") || allowed.has("report");
+  return allowed.has(id);
 }
 
-const hubOfPage = (id) => HQ_HUBS.find((h) => h.pages.includes(id)) || null;
+/** الأبواب بعناصرها المسموحة — لكل عنصرٍ (تبويب أو إجراء) شاشاته المسموحة، وأوّلها ما يُفتح بالضغط عليه. */
+function visibleHubs(storeUser) {
+  const allowed = new Set(effectivePages(storeUser));
+  const byHub = HQ_HUBS.map((h) => {
+    const items = hubSheetItems(h)
+      .map((it) => ({ ...it, views: it.views.filter((x) => viewAllowed(storeUser, allowed, x.id)) }))
+      .filter((it) => it.views.length)
+      .map((it) => ({ ...it, id: it.views[0].id }));
+    return { ...h, label: h.title, items, pages: items.map((it) => ({ id: it.id, label: it.label, icon: h.icon, group: it.group })) };
+  });
+  return byHub.filter((h) => h.items.length);
+}
 
-export { CODING_PAGE, HQ_HUBS, PAGE_REGISTRY, USERS_PAGE, effectivePages, hubOfPage, visibleHubs, noAccounting, simpleAccounting };
+/** الباب الذي فيه هذه الشاشة. */
+const hubOfPage = (id) => HQ_HUBS.find((h) => hubSheetItems(h).some((it) => it.views.some((x) => x.id === id))) || null;
+
+/** التبويب الذي فيه الشاشة المفتوحة بشاشاته المسموحة — يُرسم شريطًا فوقها حين تكون أكثر من شاشة. */
+function tabOfPage(storeUser, id) {
+  const allowed = new Set(effectivePages(storeUser));
+  for (const h of HQ_HUBS) {
+    for (const it of hubSheetItems(h)) {
+      if (!it.views.some((x) => x.id === id)) continue;
+      const views = it.views.filter((x) => viewAllowed(storeUser, allowed, x.id));
+      return { hub: h, label: it.label, views };
+    }
+  }
+  return null;
+}
+
+export { CODING_PAGE, HQ_HUBS, PAGE_REGISTRY, USERS_PAGE, effectivePages, hubOfPage, tabOfPage, viewAllowed, visibleHubs, noAccounting, simpleAccounting };
