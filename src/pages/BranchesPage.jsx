@@ -2,10 +2,12 @@ import { useCallback, useEffect, useState } from "react";
 import { Plus, Store, X } from "lucide-react";
 import { storeApi, ApiError } from "../core/api.js";
 
-export default function BranchesPage({ storeUser, onOpenBranch }) {
+export default function BranchesPage({ storeUser, onOpenBranch, openCreate = false, onCreateShown }) {
   const [branches, setBranches] = useState(null);
   const [error, setError] = useState("");
   const [showCreate, setShowCreate] = useState(false);
+  // «＋ فرع» من باب الفروع يفتح النموذج مباشرة
+  useEffect(() => { if (openCreate) { setShowCreate(true); onCreateShown?.(); } }, [openCreate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const load = useCallback(() => {
     setError("");

@@ -1,42 +1,24 @@
 import { useEffect, useState } from "react";
-import { BarChart3, Building2, Check, ChevronLeft, RadioTower, Send, Wallet, Warehouse, X } from "lucide-react";
+import { ChevronLeft, Warehouse, X } from "lucide-react";
+import { visibleHubs } from "../core/pageRegistry.js";
 import { storeApi } from "../core/api.js";
 import { hqNowTasks, hqSell24 } from "../core/design.js";
 
 /// الرئيسية بالتصميم البسيط (المرجع 2026-09-27): صفحةٌ واحدة بلا تبويبات —
-///   ① أسعار العيارات ② ذهب الفروع المملوك ③ ما ينتظر ④ الفروع ← الاعتمادات ← الشحن والتكويد ⑤ المال · التقارير.
-///   كل زرٍّ يفتح ورقةً بملحقاته؛ وما لا يملكه المستخدم يسقط.
+///   ① أسعار العيارات ② ذهب الفروع المملوك ③ ما ينتظر ④ الأبواب الكبيرة: الفروع · الوارد · الشحن والتكويد · المتجر
+///   ⑤ الأبواب الصغيرة: التحكّم والإرسال · المال · التقارير (والدفاتر والموظفون والإعدادات في ☰).
+///   الأبواب وعناصر أوراقها من تعريف المرجع (core/hqHubs.js)؛ وما لا يملكه المستخدم يسقط.
 const C = {
   bg: "#1B1A17", panel: "#25231F", field: "#2C2A25", line: "#332F28", text: "#F1ECE2", text2: "#B5AD9E", text3: "#8F887A",
   accent: "#D9B566", accentText: "#E4C47D", accentBg: "#2E2A20", accentLine: "#4D4230", bad: "#E38B76", badBg: "#2E1F1B", badLine: "#4D302A",
   grad: "linear-gradient(135deg, #E6C77E, #BF9848)", shadow: "0 1px 0 rgba(255,255,255,.03) inset, 0 12px 28px -16px rgba(0,0,0,.7)",
 };
-const TONE = { central: ["#E5A276", "#36271D"], accounting: ["#A5A9E0", "#252739"], inventory: ["#8FB3E0", "#1F2A38"], money: ["#8ACB9F", "#1E2F24"], reports: ["#86C6D6", "#1C2E33"], links: ["#7FC9B5", "#1C302B"] };
+const TONE = { sales: ["#E3C27A", "#33291A"], central: ["#E5A276", "#36271D"], accounting: ["#A5A9E0", "#252739"], inventory: ["#8FB3E0", "#1F2A38"], money: ["#8ACB9F", "#1E2F24"], reports: ["#86C6D6", "#1C2E33"], links: ["#7FC9B5", "#1C302B"] };
 const PURITY = { 24: 1, 22: 0.916, 21: 0.875, 18: 0.75 };
 const nf = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2, minimumFractionDigits: 2 });
 const wf = new Intl.NumberFormat("en-US", { maximumFractionDigits: 3, minimumFractionDigits: 3 });
 
-const LAYOUT = {
-  big: [
-    { key: "branches", title: "الفروع", hint: "عرض · تجهيز · صلاحيات", icon: Building2, tone: "central",
-      items: [["branches", "إدارة الفروع والجرد عن بُعد"], ["stocktake", "جرد الفروع — قفلٌ وعدٌّ بالمسح"], ["dashboard", "لوحة الإدارة"], ["policy", "الصلاحيات"], ["org", "الهيكل الإداري"], ["users", "الموظفون"]] },
-    { key: "approvals", title: "الاعتمادات", hint: "طلبات الفروع", icon: Check, tone: "accounting",
-      items: [["approvals", "طلبات الفروع وسياسة الاعتماد"]] },
-    { key: "ship", title: "الشحن والتكويد", hint: "بضاعة · نقد · معاملات", icon: Send, tone: "inventory",
-      items: [["hqDocs", "معاملات الإدارة والشحن للفروع"]] },
-  ],
-  small: [
-    // التحكّم والإرسال (المرجع): ما ترسله الإدارة للفروع — السعر والأهداف · الإعلانات · الإقفال
-    { key: "control", title: "التحكّم والإرسال", icon: RadioTower, tone: "links",
-      items: [["control:price", "التحكّم — السعر والأهداف"], ["control:notices", "الإعلانات"], ["control:close", "الإقفال"], ["control:orders", "أوامر للفروع"]] },
-    { key: "money", title: "المال", icon: Wallet, tone: "money",
-      items: [["expenses", "المصروفات وعمولة البنك"], ["consolidated", "الميزان الموحّد"]] },
-    { key: "reports", title: "التقارير", icon: BarChart3, tone: "reports",
-      items: [["report", "التقرير المجمّع"], ["analytics", "التحليلات"], ["consolidated", "الموحّد"], ["zakat", "زكاة الفروع"], ["netWeight", "صافي الفروع بالوزن"], ["opsLog", "سجلّ عمليات الإدارة"], ["clientErrors", "أعطال الفروع"], ["apiKeys", "الواجهة البرمجية"], ["dashboard", "لوحة الإدارة"]] },
-  ],
-};
-
-export default function SimpleHqHome({ allowed = [], isOwner = false, onGo, onOpenBranch }) {
+export default function SimpleHqHome({ storeUser, allowed = [], onGo, onOpenBranch }) {
   const [report, setReport] = useState(null);
   const [alerts, setAlerts] = useState([]);
   const [inbox, setInbox] = useState(0);
@@ -50,18 +32,15 @@ export default function SimpleHqHome({ allowed = [], isOwner = false, onGo, onOp
     storeApi.fetchPricePolicy().then((d) => setSell24(hqSell24(d.policy))).catch(() => {});
   }, []);
   // أقسام التحكّم: الإقفال لمن يملك السنة المالية أو التحكّم، والباقي للتحكّم
-  const has = (id) => (id === "dashboard" ? allowed.includes("home") : id === "users" ? isOwner
-    : id === "control:close" ? allowed.includes("fiscal") || allowed.includes("control")
-    : id.startsWith("control:") ? allowed.includes("control") : allowed.includes(id));
-  const withRows = (g) => ({ ...g, rows: g.items.filter(([id]) => has(id)) });
-  const big = LAYOUT.big.map(withRows).filter((g) => g.rows.length);
-  const small = LAYOUT.small.map(withRows).filter((g) => g.rows.length);
+  const hubs = visibleHubs(storeUser).map((h) => ({ ...h, rows: h.items.map((it) => [it.id, it.label, it.group]) }));
+  const big = hubs.filter((h) => h.place === "big");
+  const small = hubs.filter((h) => h.place === "small");
   const sheet = open ? [...big, ...small].find((g) => g.key === open) : null;
   const branches = report?.branches || [];
   const fine = branches.reduce((s, b) => s + (Number(b.inventory?.fineWeight) || 0) + (Number(b.safe?.goldFineWeight) || 0), 0);
   const tasks = report ? hqNowTasks({ branches: branches.length, idle: branches.filter((b) => !(b.sales?.count > 0)).length, inbox, alerts }) : [];
   const num = { fontVariantNumeric: "tabular-nums" };
-  const badges = { approvals: inbox };
+  const badges = { inbox };
   const card = { background: C.panel, border: `1px solid ${C.line}`, borderRadius: 20, boxShadow: C.shadow };
   const go = (id) => { setOpen(null); onGo(id); };
   const pickTask = (t) => (t.branchId ? onOpenBranch(t.branchId, t.branchName) : onGo(t.id === "home" ? "dashboard" : t.id));
@@ -80,7 +59,7 @@ export default function SimpleHqHome({ allowed = [], isOwner = false, onGo, onOp
         <p style={{ color: C.text3 }} className="text-[10px] text-center mt-1">سعر البيع للجرام اليوم من سياسة الإدارة · ر.س</p>
       </div>
 
-      <button onClick={() => has("consolidated") && onGo("consolidated")} className="w-full text-right mb-3 px-4 py-3"
+      <button onClick={() => allowed.includes("consolidated") && onGo("consolidated")} className="w-full text-right mb-3 px-4 py-3"
         style={{ ...card, background: `linear-gradient(135deg, ${C.accentBg}, ${C.panel} 70%)`, border: `1px solid ${C.accentLine}` }}>
         <div className="flex items-center justify-between">
           <span style={{ color: C.text2 }} className="text-xs font-bold">ذهب الفروع المملوك · صافي عيار 24</span>
@@ -147,16 +126,20 @@ export default function SimpleHqHome({ allowed = [], isOwner = false, onGo, onOp
               <h2 className="text-lg font-bold">{sheet.title}</h2>
               <button onClick={() => setOpen(null)} aria-label="إغلاق"><X size={20} color={C.text2} /></button>
             </div>
-            <div className="flex flex-col gap-2 pb-2">
-              {sheet.rows.map(([id, label], i) => {
+            <div className="flex flex-col gap-2 pb-2 overflow-y-auto" style={{ maxHeight: "70vh" }}>
+              {sheet.rows.map(([id, label, group], i) => {
                 const [fg, bg] = TONE[sheet.tone], Icon = sheet.icon, lead = i === 0;
+                const groupStart = group && sheet.rows[i - 1]?.[2] !== group;
                 return (
-                  <button key={id + i} onClick={() => go(id)} className="w-full flex items-center gap-3 px-3 py-3 text-right"
+                  <div key={id + i}>
+                  {groupStart && <div className="text-[11px] font-bold px-1 pt-2 pb-1" style={{ color: C.text3 }}>{group}</div>}
+                  <button onClick={() => go(id)} className="w-full flex items-center gap-3 px-3 py-3 text-right"
                     style={{ borderRadius: 16, background: lead ? bg : C.field, border: `1px solid ${lead ? fg : C.line}` }}>
                     <span className="flex items-center justify-center" style={{ width: 36, height: 36, borderRadius: 12, background: lead ? fg : C.panel, color: lead ? C.panel : fg }}><Icon size={18} /></span>
                     <span className={`text-sm flex-1 ${lead ? "font-black" : "font-bold"}`}>{label}</span>
                     <ChevronLeft size={15} color={C.text3} />
                   </button>
+                  </div>
                 );
               })}
             </div>

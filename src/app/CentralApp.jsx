@@ -13,6 +13,11 @@ import ControlPage from "../pages/ControlPage.jsx";
 import ConsolidatedPage from "../pages/ConsolidatedPage.jsx";
 import ZakatPage from "../pages/ZakatPage.jsx";
 import NetWeightPage from "../pages/NetWeightPage.jsx";
+import WastageCard from "../pages/WastageCard.jsx";
+import { AlertsPage, TransitPage } from "../pages/HubPages.jsx";
+import CompliancePage from "../pages/CompliancePage.jsx";
+import TabViewsBar from "../ui/TabViewsBar.jsx";
+import { openHqBook } from "../core/hqBooks.js";
 import AssistantPage from "../pages/AssistantPage.jsx";
 import StocktakePage from "../pages/StocktakePage.jsx";
 import ClientErrorsPage from "../pages/ClientErrorsPage.jsx";
@@ -28,7 +33,7 @@ import SimpleHqHome from "../ui/SimpleHqHome.jsx";
 import DesignPicker from "../ui/DesignPicker.jsx";
 import { applyDesign, loadDesign, saveDesign } from "../core/design.js";
 import { ChevronRight, LogOut, Menu, X } from "lucide-react";
-import { effectivePages, noAccounting, visibleHubs } from "../core/pageRegistry.js";
+import { effectivePages, noAccounting, tabOfPage, viewAllowed, visibleHubs } from "../core/pageRegistry.js";
 
 /**
  * تطبيق الإدارة المركزية — نقطة الدخول.
@@ -47,6 +52,8 @@ export default function CentralApp() {
   const [tab, setTab] = useState("home");
   // قسم «التحكّم والإرسال» المفتوح: price · notices · close · orders (المرجع HQ_CONSOLE_TABS)
   const [controlSection, setControlSection] = useState("price");
+  // «＋ فرع» من باب الفروع يفتح صفحة الفروع ونموذج الإنشاء مفتوح
+  const [branchesAdd, setBranchesAdd] = useState(false);
   // ⚠ طبقة فوق التبويبات لا بديلًا عنها: يدخل "تفاصيل فرع" من أي تبويب
   // (الرئيسية أو الفروع)، ويرجع لنفس التبويب الذي جاء منه — لا لتبويبٍ
   // ثابت دائمًا.
@@ -117,16 +124,18 @@ export default function CentralApp() {
   const allowed = effectivePages(storeUser);
   // «control:<قسم>» يفتح «التحكّم والإرسال» على قسمه، و«fiscal» على الإقفال (كما في المرجع)
   const route = (next) => {
+    // شاشة دفتر الإدارة: تُفتح في تطبيق الفرع على الفرع الرئيسي، ولا تتغيّر الصفحة هنا
+    if (String(next).startsWith("book:")) { openHqBook(next.slice(5)).then((why) => why && window.alert(why)); return null; }
+    if (next === "branches:add") { setBranchesAdd(true); return "branches"; }
     if (next === "fiscal") { setControlSection("close"); return "control"; }
     if (String(next).startsWith("control:")) { setControlSection(next.slice(8)); return "control"; }
     if (next === "control") setControlSection("price");
     return next;
   };
-  const go = (next) => { setOpenBranch(null); setMenuOpen(false); setTab(route(next)); };
+  const go = (next) => { setMenuOpen(false); const t = route(next); if (t) { setOpenBranch(null); setTab(t); } };
 
   // الشاشة غير المسموحة لا تُرسم أصلًا (الخادم يرفض بياناتها أيضًا) — تُعرض أوّل شاشةٍ مسموحة
-  const tabAllowed = tab === "users" ? storeUser?.role === "owner"
-    : allowed.includes(tab) || (tab === "dashboard" && allowed.includes("home")) || (tab === "control" && allowed.includes("fiscal"));
+  const tabAllowed = (tab === "control" && allowed.includes("fiscal")) || viewAllowed(storeUser, new Set(allowed), tab);
   const homeTab = allowed.includes("home") ? "home" : allowed[0] || "home";
   const pageBody = !openBranch && !tabAllowed ? (
     <div className="text-sm text-neutral-400 py-10 text-center" data-page-denied>
@@ -135,6 +144,7 @@ export default function CentralApp() {
     </div>
   ) : (
     <>
+        {!openBranch && <TabViewsBar tab={tabOfPage(storeUser, tab === "control" ? `control:${controlSection}` : tab)} current={tab === "control" ? `control:${controlSection}` : tab} onGo={go} />}
         {openBranch && allowed.includes("branches") ? (
           <BranchDetailPage
             branchId={openBranch.id}
@@ -150,7 +160,7 @@ export default function CentralApp() {
             onOpenHqDocs={effectivePages(storeUser).includes("hqDocs") ? () => setTab("hqDocs") : undefined}
             radiant={design === "radiant"} onGoTab={go} />
         ) : tab === "branches" ? (
-          <BranchesPage storeUser={storeUser} onOpenBranch={openBranchDetail} />
+          <BranchesPage storeUser={storeUser} onOpenBranch={openBranchDetail} openCreate={branchesAdd} onCreateShown={() => setBranchesAdd(false)} />
         ) : tab === "analytics" ? (
           <AnalyticsPage />
         ) : tab === "users" ? (
@@ -170,6 +180,14 @@ export default function CentralApp() {
             sections={[...(allowed.includes("control") ? ["price", "notices"] : []), "close", ...(allowed.includes("control") ? ["orders"] : [])]} />
         ) : tab === "consolidated" ? (
           <ConsolidatedPage />
+        ) : tab === "alerts" ? (
+          <AlertsPage onOpenBranch={openBranchDetail} />
+        ) : tab === "transit" ? (
+          <TransitPage />
+        ) : tab === "wastage" ? (
+          <WastageCard />
+        ) : tab === "compliance" ? (
+          <CompliancePage onOpenBranch={openBranchDetail} />
         ) : tab === "zakat" ? (
           <ZakatPage />
         ) : tab === "netWeight" ? (
@@ -223,7 +241,7 @@ export default function CentralApp() {
         </header>
         <main className="max-w-6xl mx-auto p-4">
           {atHome ? (
-            <SimpleHqHome allowed={allowed} isOwner={storeUser?.role === "owner"} onGo={go} onOpenBranch={openBranchDetail} />
+            <SimpleHqHome storeUser={storeUser} allowed={allowed} onGo={go} onOpenBranch={openBranchDetail} />
           ) : tab === "dashboard" && !openBranch ? (
             <DashboardPage onOpenBranch={openBranchDetail}
               onOpenApprovals={allowed.includes("approvals") ? () => go("approvals") : undefined}
@@ -267,7 +285,7 @@ export default function CentralApp() {
       <TopBar
         storeUser={storeUser}
         tab={tab}
-        onTabChange={(next) => { setOpenBranch(null); setTab(route(next)); }}
+        onTabChange={(next) => { const t = route(next); if (t) { setOpenBranch(null); setTab(t); } }}
         onLogout={handleLogout}
         design={design}
         onDesign={changeDesign}
