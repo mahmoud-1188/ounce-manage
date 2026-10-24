@@ -330,6 +330,9 @@ const storeApi = {
   fetchWastage: (from, to) => apiFetch(`/store/wastage?from=${from}&to=${to}`),
   sendPeriodLocks: (body) => apiFetch("/store/period-locks", { method: "POST", body }),
   closeBranchMonth: (branchId, period) => apiFetch(`/store/branches/${branchId}/close-month`, { method: "POST", body: { period } }),
+  /** السنة المالية لفرع: دخل الفترة منذ آخر إقفال وسجلّ الإقفالات — وإقفالها من الإدارة */
+  fetchBranchFiscalYear: (branchId) => apiFetch(`/store/branches/${branchId}/fiscal-year`),
+  closeBranchYear: (branchId, notes) => apiFetch(`/store/branches/${branchId}/close-year`, { method: "POST", body: { notes } }),
   fetchStocktakeSheet: (branchId) => apiFetch(`/store/branches/${branchId}/stocktake-sheet`),
   sendRemoteStocktake: (branchId, counts, note, extra = {}) => apiFetch(`/store/branches/${branchId}/remote-stocktake`, { method: "POST", body: { counts, note, ...extra } }),
   setStocktakeLock: (branchId, on) => apiFetch(`/store/branches/${branchId}/stocktake-lock`, { method: "POST", body: { on } }),
