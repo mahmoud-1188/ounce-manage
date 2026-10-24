@@ -6,10 +6,12 @@ import { hqError } from "../ui/hqErrors.js";
 const money = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 const fmt = (n) => money.format(Number(n) || 0);
 
-/** أهداف المبيعات — هدف ٣٠ يومًا لكل فرع، والمتحقّق منه ونسبته. */
+/** الهدف والسقف (المرجع «هدف وسقف») — هدف مبيعات ٣٠ يومًا لكل فرع والمتحقّق منه ونسبته،
+ *  وسقف مصروفات الشهر: يُنبَّه في «التنبيهات» حين تتجاوزه مصروفات الفرع. */
 export default function TargetsCard({ canManage }) {
   const [rows, setRows] = useState(null);
   const [draft, setDraft] = useState({});
+  const [capDraft, setCapDraft] = useState({});
   const [error, setError] = useState("");
   const [savedId, setSavedId] = useState(null);
 
@@ -27,12 +29,23 @@ export default function TargetsCard({ canManage }) {
       load();
     } catch (e) { setError(hqError(e, "تعذّر حفظ الهدف")); }
   };
+  const saveCap = async (b) => {
+    const v = Number(capDraft[b.id]);
+    if (!Number.isFinite(v) || v < 0) return;
+    setError("");
+    try {
+      await storeApi.setBranchExpenseCap(b.id, v);
+      setCapDraft((d) => { const n = { ...d }; delete n[b.id]; return n; });
+      setSavedId(`cap${b.id}`); setTimeout(() => setSavedId(null), 2000);
+      load();
+    } catch (e) { setError(hqError(e, "تعذّر حفظ السقف")); }
+  };
 
   return (
     <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-4 space-y-3">
       <div className="flex items-center gap-2">
         <Target size={16} className="text-amber-500" />
-        <h3 className="text-sm font-semibold">أهداف المبيعات (٣٠ يومًا)</h3>
+        <h3 className="text-sm font-semibold">الهدف والسقف — مبيعات ٣٠ يومًا ومصروفات الشهر</h3>
       </div>
       {error && <div className="text-xs text-red-400">{error}</div>}
       {rows === null ? <div className="text-xs text-neutral-500">جارِ التحميل…</div> : (
@@ -56,6 +69,21 @@ export default function TargetsCard({ canManage }) {
                       className="flex-1 rounded-lg bg-neutral-800 border border-neutral-700 px-2 py-1 text-xs" />
                     <button type="button" onClick={() => save(b)} disabled={draft[b.id] == null || draft[b.id] === ""}
                       className="rounded-lg px-3 text-xs bg-neutral-800 border border-neutral-700 disabled:opacity-40">{savedId === b.id ? "✓" : "حفظ"}</button>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 text-[11px]" data-expense-cap>
+                  <span className="flex-1 text-neutral-500">مصروفات الشهر</span>
+                  <span className={`tabular-nums ${b.overCap ? "text-red-400 font-semibold" : "text-neutral-400"}`}>
+                    {fmt(b.expensesMtd)} / {b.expenseCap > 0 ? `سقف ${fmt(b.expenseCap)}` : "بلا سقف"}{b.overCap ? " — تجاوز" : ""}
+                  </span>
+                </div>
+                {canManage && (
+                  <div className="flex gap-2">
+                    <input inputMode="decimal" value={capDraft[b.id] ?? ""} placeholder={b.expenseCap > 0 ? `السقف الحالي ${fmt(b.expenseCap)} — 0 يلغيه` : "سقف مصروفات الشهر"}
+                      onChange={(e) => setCapDraft({ ...capDraft, [b.id]: e.target.value.replace(/[^\d.]/g, "") })} aria-label="سقف مصروفات الشهر"
+                      className="flex-1 rounded-lg bg-neutral-800 border border-neutral-700 px-2 py-1 text-xs" />
+                    <button type="button" onClick={() => saveCap(b)} disabled={capDraft[b.id] == null || capDraft[b.id] === ""}
+                      className="rounded-lg px-3 text-xs bg-neutral-800 border border-neutral-700 disabled:opacity-40">{savedId === `cap${b.id}` ? "✓" : "حفظ"}</button>
                   </div>
                 )}
               </div>

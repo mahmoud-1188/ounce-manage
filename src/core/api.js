@@ -242,6 +242,9 @@ const storeApi = {
   fetchTargets: () => apiFetch("/store/targets"),
   setBranchTarget: (branchId, target30) =>
     apiFetch(`/store/branches/${branchId}/target`, { method: "PATCH", body: { target30 } }),
+  /** سقف مصروفات الشهر للفرع (migration 101) — صفرٌ = بلا سقف */
+  setBranchExpenseCap: (branchId, expenseCap) =>
+    apiFetch(`/store/branches/${branchId}/target`, { method: "PATCH", body: { expenseCap } }),
   /** من يعتمد ماذا: expense/refund/supplier_settle → hq | branch */
   fetchApprovalRouting: () => apiFetch("/store/approval-routing"),
   saveApprovalRouting: (routing, limits = {}) => apiFetch("/store/approval-routing", { method: "PUT", body: { routing, ...limits } }),
